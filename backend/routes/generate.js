@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const Draft = require('../models/Draft');
+const Activity = require('../models/Activity');
 const auth = require('../middleware/auth');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// Initialize Gemini AI
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY);
 
 // Mock draft generator (fallback when API is unavailable)
 const generateMockDraft = (caseType, details, jurisdiction) => {
@@ -73,7 +78,7 @@ Generated on: ${date}
 Draft Type: ${caseType}`;
 };
 
-// Generate full draft
+// Generate full draft with REAL AI
 router.post('/', async (req, res) => {
   try {
     const { caseType, details, jurisdiction } = req.body;
@@ -86,22 +91,81 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Please provide sufficient case details (minimum 10 characters)' });
     }
 
-    console.log(`Generating draft for case type: ${caseType}, jurisdiction: ${jurisdiction || 'default'}`);
+    console.log(`Generating draft using Gemini AI for case type: ${caseType}`);
 
-    // Use mock draft generator as fallback
-    const draftText = generateMockDraft(caseType, details, jurisdiction);
+    try {
+      // Use Gemini AI for real draft generation
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      
+      const prompt = `You are an expert legal assistant specializing in ${jurisdiction || 'general'} law. Generate a comprehensive, professional legal draft document for the following case:
 
-    console.log('Draft generated successfully, length:', draftText.length);
+Case Type: ${caseType}
+Jurisdiction: ${jurisdiction || 'General'}
+Case Details: ${details}
 
-    res.json({
-      draft: draftText,
-      metadata: {
-        model: "mock-generator",
-        caseType,
-        jurisdiction: jurisdiction || 'default',
-        timestamp: new Date().toISOString()
+Generate a complete legal draft following this structure:
+1. Title and Header (with case type, date, jurisdiction)
+2. Parties Involved (identify from case details)
+3. Factual Background (detailed summary of the case)
+4. Legal Issues (identify key legal questions)
+5. Applicable Laws and Legal Provisions (cite relevant statutes, acts, case law)
+6. Legal Arguments and Analysis
+7. Prayers/Relief Sought (specific remedies requested)
+8. Conclusion and Submission
+
+Use formal legal language, proper legal citation format, and professional structure. The draft should be ready for review by a legal professional. Include appropriate legal terminology and formatting for ${jurisdiction || 'general'} jurisdiction.`;
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const draftText = response.text();
+
+      console.log('✅ Draft generated successfully with Gemini AI');
+
+      // Log activity if user is authenticated
+      if (req.userId) {
+        try {
+          await Activity.create({
+            userId: req.userId,
+            action: 'Generated Draft',
+            title: `${caseType} Draft`,
+            type: caseType,
+            details: `Generated AI-powered legal draft using Gemini AI`,
+            metadata: { jurisdiction, aiGenerated: true }
+          });
+        } catch (actErr) {
+          console.error('Activity logging error:', actErr.message);
+        }
       }
-    });
+
+      res.json({
+        draft: draftText,
+        metadata: {
+          model: "gemini-2.5-flash",
+          aiGenerated: true,
+          caseType,
+          jurisdiction: jurisdiction || 'General',
+          timestamp: new Date().toISOString()
+        }
+      });
+
+    } catch (aiError) {
+      console.error('Gemini API error, falling back to mock:', aiError.message);
+      
+      // Fallback to mock if AI fails
+      const draftText = generateMockDraft(caseType, details, jurisdiction);
+
+      res.json({
+        draft: draftText,
+        metadata: {
+          model: "fallback-mock",
+          aiGenerated: false,
+          caseType,
+          jurisdiction: jurisdiction || 'default',
+          timestamp: new Date().toISOString(),
+          note: "AI service temporarily unavailable, using template"
+        }
+      });
+    }
 
   } catch (err) {
     console.error("Draft generation error:", err);

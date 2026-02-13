@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
+import axios from '../utils/axios';
 import '../App.css';
 
 const ResearchPage = () => {
@@ -9,123 +10,41 @@ const ResearchPage = () => {
   const [selectedCase, setSelectedCase] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Mock data for demonstration
-  const mockCaseLaw = [
-    {
-      id: 1,
-      title: 'Kesavananda Bharati v. State of Kerala',
-      citation: 'AIR 1973 SC 1461',
-      year: 1973,
-      court: 'Supreme Court of India',
-      summary: 'Established the basic structure doctrine of the Constitution. The Parliament cannot alter the basic structure of the Constitution through amendments.',
-      relevance: 'Constitutional Law'
-    },
-    {
-      id: 2,
-      title: 'Maneka Gandhi v. Union of India',
-      citation: 'AIR 1978 SC 597',
-      year: 1978,
-      court: 'Supreme Court of India',
-      summary: 'Expanded the scope of Article 21 to include the right to live with dignity. Established that procedure must be fair, just, and reasonable.',
-      relevance: 'Fundamental Rights'
-    },
-    {
-      id: 3,
-      title: 'Vishaka v. State of Rajasthan',
-      citation: 'AIR 1997 SC 3011',
-      year: 1997,
-      court: 'Supreme Court of India',
-      summary: 'Established guidelines for prevention of sexual harassment at workplace. Landmark judgment for women\'s rights.',
-      relevance: 'Women\'s Rights, Employment Law'
-    },
-  ];
-
-  const mockStatutes = [
-    {
-      id: 1,
-      title: 'Indian Penal Code, 1860',
-      sections: '511 Sections',
-      description: 'The main criminal code of India covering all substantive aspects of criminal law.',
-      keywords: 'Criminal, Offences, Punishment'
-    },
-    {
-      id: 2,
-      title: 'Code of Criminal Procedure, 1973',
-      sections: '484 Sections',
-      description: 'The procedural law for administration of criminal law in India.',
-      keywords: 'Procedure, Investigation, Trial, Bail'
-    },
-    {
-      id: 3,
-      title: 'Indian Contract Act, 1872',
-      sections: '266 Sections',
-      description: 'Governs the law relating to contracts in India.',
-      keywords: 'Contracts, Agreements, Consideration'
-    },
-    {
-      id: 4,
-      title: 'Indian Evidence Act, 1872',
-      sections: '167 Sections',
-      description: 'Deals with rules and principles of evidence in Indian courts.',
-      keywords: 'Evidence, Proof, Testimony'
-    },
-  ];
-
-  const mockLegalTerms = [
-    {
-      term: 'Habeas Corpus',
-      definition: 'A writ requiring a person under arrest to be brought before a judge or into court, to secure the person\'s release unless lawful grounds are shown for their detention.',
-      category: 'Latin Terms'
-    },
-    {
-      term: 'Prima Facie',
-      definition: 'At first sight; on the face of it. Evidence that is sufficient to establish a fact unless rebutted.',
-      category: 'Latin Terms'
-    },
-    {
-      term: 'Mens Rea',
-      definition: 'The mental element of a crime; guilty mind. The intention or knowledge of wrongdoing that constitutes part of a crime.',
-      category: 'Criminal Law'
-    },
-    {
-      term: 'Consideration',
-      definition: 'Something of value given by both parties to a contract that induces them to enter into the agreement to exchange mutual performances.',
-      category: 'Contract Law'
-    },
-  ];
-
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!searchQuery.trim()) {
       alert('Please enter a search query');
       return;
     }
 
     setIsSearching(true);
+    setSearchResults([]);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      let response;
+      
       if (activeTab === 'caseLaw') {
-        const filtered = mockCaseLaw.filter(
-          c => c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               c.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               c.relevance.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setSearchResults(filtered);
+        response = await axios.post('/research/cases', { query: searchQuery });
+        setSearchResults(response.data.results || []);
       } else if (activeTab === 'statutes') {
-        const filtered = mockStatutes.filter(
-          s => s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               s.keywords.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setSearchResults(filtered);
+        response = await axios.post('/research/statutes', { query: searchQuery });
+        setSearchResults(response.data.results || []);
       } else if (activeTab === 'dictionary') {
-        const filtered = mockLegalTerms.filter(
-          t => t.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               t.definition.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setSearchResults(filtered);
+        response = await axios.post('/research/dictionary', { term: searchQuery });
+        // Dictionary returns single result, format it for display
+        if (response.data.success) {
+          setSearchResults([{
+            term: response.data.term,
+            definition: response.data.definition,
+            category: 'Indian Law'
+          }]);
+        }
       }
+    } catch (error) {
+      console.error('Search error:', error);
+      alert('Search failed. Please try again.');
+    } finally {
       setIsSearching(false);
-    }, 500);
+    }
   };
 
   const handleCopyToClipboard = (text) => {
@@ -142,7 +61,7 @@ const ResearchPage = () => {
             🔍 Legal Research Tools
           </h1>
           <p className="text-slate-400 text-lg">
-            Access comprehensive case law, statutes, and legal definitions instantly
+            AI-powered Indian legal research - Cases, Statutes & Definitions
           </p>
         </div>
 
@@ -154,8 +73,8 @@ const ResearchPage = () => {
               <div className="text-5xl">📚</div>
               <div>
                 <p className="text-blue-200 text-sm">Case Law Database</p>
-                <p className="text-3xl font-bold text-white mt-1">1000+</p>
-                <p className="text-blue-300 text-xs mt-1">Supreme Court & High Court</p>
+                <p className="text-3xl font-bold text-white mt-1">AI-Powered</p>
+                <p className="text-blue-300 text-xs mt-1">Gemini AI Research</p>
               </div>
             </div>
           </div>
@@ -165,8 +84,8 @@ const ResearchPage = () => {
               <div className="text-5xl">📖</div>
               <div>
                 <p className="text-green-200 text-sm">Indian Statutes</p>
-                <p className="text-3xl font-bold text-white mt-1">50+</p>
-                <p className="text-green-300 text-xs mt-1">Acts & Regulations</p>
+                <p className="text-3xl font-bold text-white mt-1">AI-Powered</p>
+                <p className="text-green-300 text-xs mt-1">Gemini AI Research</p>
               </div>
             </div>
           </div>
@@ -176,8 +95,8 @@ const ResearchPage = () => {
               <div className="text-5xl">📘</div>
               <div>
                 <p className="text-purple-200 text-sm">Legal Dictionary</p>
-                <p className="text-3xl font-bold text-white mt-1">500+</p>
-                <p className="text-purple-300 text-xs mt-1">Terms & Definitions</p>
+                <p className="text-3xl font-bold text-white mt-1">AI-Powered</p>
+                <p className="text-purple-300 text-xs mt-1">Gemini AI Definitions</p>
               </div>
             </div>
           </div>
@@ -285,10 +204,10 @@ const ResearchPage = () => {
                         📋 Copy Citation
                       </button>
                       <button
-                        onClick={() => setSelectedCase(caseItem)}
+                        onClick={() => handleCopyToClipboard(`${caseItem.title}\n${caseItem.citation}\n${caseItem.summary}`)}
                         className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg hover:from-blue-700 hover:to-blue-900 transition-all text-sm font-semibold flex items-center justify-center gap-2 shadow-lg"
                       >
-                        📖 View Full Details
+                        📄 Copy Case Details
                       </button>
                     </div>
                   </div>
@@ -297,9 +216,9 @@ const ResearchPage = () => {
             ) : (
               <div className="card text-center py-16 bg-gradient-to-br from-slate-800 to-slate-900">
                 <div className="text-8xl mb-6">📚</div>
-                <h3 className="text-3xl font-bold text-white mb-4">Search Indian Case Law</h3>
+                <h3 className="text-3xl font-bold text-white mb-4">AI-Powered Case Law Research</h3>
                 <p className="text-slate-400 text-lg mb-8 max-w-2xl mx-auto">
-                  Access Supreme Court and High Court judgments, precedents, and legal citations
+                  Search for Indian Supreme Court and High Court judgments using AI
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                   <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
@@ -308,14 +227,14 @@ const ResearchPage = () => {
                     <p className="text-white text-lg font-bold">"Fundamental Rights"</p>
                   </div>
                   <div className="bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
-                       onClick={() => { setSearchQuery("AIR 1973"); handleSearch(); }}>
-                    <p className="text-purple-200 font-semibold mb-2 text-sm">Or by citation:</p>
-                    <p className="text-white text-lg font-bold">"AIR 1973"</p>
+                       onClick={() => { setSearchQuery("Article 21"); handleSearch(); }}>
+                    <p className="text-purple-200 font-semibold mb-2 text-sm">Or by article:</p>
+                    <p className="text-white text-lg font-bold">"Article 21"</p>
                   </div>
                   <div className="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
-                       onClick={() => { setSearchQuery("Constitutional"); handleSearch(); }}>
-                    <p className="text-green-200 font-semibold mb-2 text-sm">Or by issue:</p>
-                    <p className="text-white text-lg font-bold">"Constitutional"</p>
+                       onClick={() => { setSearchQuery("Kesavananda Bharati"); handleSearch(); }}>
+                    <p className="text-green-200 font-semibold mb-2 text-sm">Or case name:</p>
+                    <p className="text-white text-lg font-bold">"Kesavananda Bharati"</p>
                   </div>
                 </div>
               </div>
@@ -342,14 +261,16 @@ const ResearchPage = () => {
                     </div>
                     <p className="text-slate-300 leading-relaxed mb-4 text-sm bg-slate-800/50 p-4 rounded-lg">{statute.description}</p>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {statute.keywords.split(', ').map((keyword, idx) => (
+                      {statute.keywords.split(',').map((keyword, idx) => (
                         <span key={idx} className="px-3 py-1 bg-green-600/20 text-green-300 rounded-full text-xs border border-green-500/30">
-                          {keyword}
+                          {keyword.trim()}
                         </span>
                       ))}
                     </div>
-                    <button className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-800 text-white rounded-lg hover:from-green-700 hover:to-green-900 transition-all text-sm font-semibold shadow-lg flex items-center justify-center gap-2">
-                      📖 Browse Sections
+                    <button 
+                      onClick={() => handleCopyToClipboard(`${statute.title}\n${statute.description}`)}
+                      className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-800 text-white rounded-lg hover:from-green-700 hover:to-green-900 transition-all text-sm font-semibold shadow-lg flex items-center justify-center gap-2">
+                      📋 Copy Details
                     </button>
                   </div>
                 ))}
@@ -357,23 +278,26 @@ const ResearchPage = () => {
             ) : (
               <div className="card text-center py-16 bg-gradient-to-br from-slate-800 to-slate-900">
                 <div className="text-8xl mb-6">📖</div>
-                <h3 className="text-3xl font-bold text-white mb-4">Browse Indian Statutes</h3>
+                <h3 className="text-3xl font-bold text-white mb-4">Search Indian Statutes & Acts</h3>
                 <p className="text-slate-400 text-lg mb-8">
-                  Quick access to IPC, CPC, CrPC, and other important acts
+                  Search for IPC sections, bare acts, and legal provisions from Indian Kanoon
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                  {mockStatutes.map((statute) => (
-                    <div key={statute.id} 
-                         className="bg-gradient-to-br from-slate-700 to-slate-800 p-6 rounded-xl text-left hover:from-slate-600 hover:to-slate-700 transition-all cursor-pointer border border-slate-600 hover:border-green-500 hover:scale-105"
-                         onClick={() => { setSearchQuery(statute.title); handleSearch(); }}>
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className="text-3xl">📜</span>
-                        <h4 className="text-white font-bold text-lg">{statute.title}</h4>
-                      </div>
-                      <p className="text-green-400 text-sm mb-2 font-semibold">{statute.sections}</p>
-                      <p className="text-slate-400 text-sm">{statute.description}</p>
-                    </div>
-                  ))}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                  <div className="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
+                       onClick={() => { setSearchQuery("Indian Penal Code"); handleSearch(); }}>
+                    <p className="text-green-200 font-semibold mb-2 text-sm">Try searching:</p>
+                    <p className="text-white text-lg font-bold">"Indian Penal Code"</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
+                       onClick={() => { setSearchQuery("Section 302 IPC"); handleSearch(); }}>
+                    <p className="text-blue-200 font-semibold mb-2 text-sm">Or by section:</p>
+                    <p className="text-white text-lg font-bold">"Section 302 IPC"</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
+                       onClick={() => { setSearchQuery("Contract Act"); handleSearch(); }}>
+                    <p className="text-purple-200 font-semibold mb-2 text-sm">Or by act:</p>
+                    <p className="text-white text-lg font-bold">"Contract Act"</p>
+                  </div>
                 </div>
               </div>
             )}
@@ -383,7 +307,7 @@ const ResearchPage = () => {
         {activeTab === 'dictionary' && (
           <div className="space-y-6">
             {searchResults.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6">
                 {searchResults.map((term, idx) => (
                   <div key={idx} className="card glass-hover border-l-4 border-purple-500 hover:border-purple-400 transition-all">
                     <div className="flex justify-between items-start mb-4">
@@ -396,7 +320,7 @@ const ResearchPage = () => {
                       </span>
                     </div>
                     <div className="bg-slate-800/50 p-4 rounded-lg mb-4">
-                      <p className="text-slate-300 leading-relaxed text-sm">{term.definition}</p>
+                      <div className="text-slate-300 leading-relaxed text-sm whitespace-pre-wrap">{term.definition}</div>
                     </div>
                     <button
                       onClick={() => handleCopyToClipboard(`${term.term}: ${term.definition}`)}
@@ -410,27 +334,26 @@ const ResearchPage = () => {
             ) : (
               <div className="card text-center py-16 bg-gradient-to-br from-slate-800 to-slate-900">
                 <div className="text-8xl mb-6">📘</div>
-                <h3 className="text-3xl font-bold text-white mb-4">Legal Terms Dictionary</h3>
+                <h3 className="text-3xl font-bold text-white mb-4">AI-Powered Legal Dictionary</h3>
                 <p className="text-slate-400 text-lg mb-8">
-                  Instant definitions of legal terms, Latin phrases, and legal concepts
+                  Get instant AI-generated definitions for legal terms, IPC sections, and concepts
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                  {mockLegalTerms.map((term, idx) => (
-                    <div key={idx} 
-                         className="bg-gradient-to-br from-slate-700 to-slate-800 p-6 rounded-xl text-left hover:from-slate-600 hover:to-slate-700 transition-all cursor-pointer border border-slate-600 hover:border-purple-500 hover:scale-105"
-                         onClick={() => { setSearchQuery(term.term); handleSearch(); }}>
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-white font-bold text-lg flex items-center gap-2">
-                          <span className="text-2xl">📖</span>
-                          {term.term}
-                        </h4>
-                        <span className="px-2 py-1 bg-purple-600/30 text-purple-300 rounded-full text-xs">
-                          {term.category}
-                        </span>
-                      </div>
-                      <p className="text-slate-400 text-sm leading-relaxed">{term.definition}</p>
-                    </div>
-                  ))}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                  <div className="bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
+                       onClick={() => { setSearchQuery("IPC 302"); handleSearch(); }}>
+                    <p className="text-purple-200 font-semibold mb-2 text-sm">Try searching:</p>
+                    <p className="text-white text-lg font-bold">"IPC 302"</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
+                       onClick={() => { setSearchQuery("Habeas Corpus"); handleSearch(); }}>
+                    <p className="text-blue-200 font-semibold mb-2 text-sm">Or Latin terms:</p>
+                    <p className="text-white text-lg font-bold">"Habeas Corpus"</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
+                       onClick={() => { setSearchQuery("Mens Rea"); handleSearch(); }}>
+                    <p className="text-green-200 font-semibold mb-2 text-sm">Or concepts:</p>
+                    <p className="text-white text-lg font-bold">"Mens Rea"</p>
+                  </div>
                 </div>
               </div>
             )}

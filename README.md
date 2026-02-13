@@ -24,6 +24,28 @@ LexiCraft is a comprehensive web application that streamlines the legal document
 - 🎨 **Modern UI** - Clean, professional interface with Galaxy animation and responsive design
 - 🔒 **Security** - 7-day token expiration, protected routes, and comprehensive security documentation
 
+## ⚡ Quick Start (5 Minutes)
+
+```bash
+# 1. Clone & Install
+git clone <repo-url> && cd Law
+cd backend && npm install && cd ../frontend && npm install
+
+# 2. Setup .env file in backend/
+# Add: MONGO_URI, JWT_SECRET, OPENAI_API_KEY, PORT=5000
+
+# 3. Run (in 2 terminals)
+# Terminal 1 - Backend
+cd backend && npm run dev
+
+# Terminal 2 - Frontend  
+cd frontend && npm start
+```
+
+Visit **http://localhost:3000** and start drafting! 🚀
+
+---
+
 ## 🛠️ Tech Stack
 
 ### Frontend
