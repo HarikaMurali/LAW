@@ -75,105 +75,133 @@ const Dashboard = () => {
     }
   };
 
+  const statCards = [
+    { label: 'Total Drafts', value: drafts.length, icon: '📄', color: '#a855f7' },
+    { label: 'This Month', value: 12, icon: '📅', color: '#3b82f6' },
+    { label: 'Templates Used', value: 8, icon: '📋', color: '#10b981' },
+    { label: 'Time Saved', value: '24h', icon: '⏱️', color: '#f59e0b' },
+  ];
+
   return (
     <Layout>
       {/* Galaxy Background */}
-      <div style={{ 
-        position: 'fixed', 
-        top: 0, 
-        left: 0, 
-        width: '100vw', 
-        height: '100vh', 
-        zIndex: -10,
-        pointerEvents: 'none'
+      <div style={{
+        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+        zIndex: -10, pointerEvents: 'none'
       }}>
-        <Galaxy 
-          mouseRepulsion={true}
-          mouseInteraction={false}
-          density={1.5}
-          glowIntensity={0.5}
-          saturation={0.0}
-          hueShift={0}
-          transparent={false}
+        <Galaxy
+          mouseRepulsion={true} mouseInteraction={false} density={1.5}
+          glowIntensity={0.5} saturation={0.0} hueShift={0} transparent={false}
         />
       </div>
-      
-      <div className="animate-fade-in-up relative z-10">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">
-            Welcome back, {localStorage.getItem('userName') || 'User'}! 👋
-          </h1>
-          <p className="text-slate-400">Generate professional legal drafts in seconds</p>
+
+      <div className="animate-fade-in-up" style={{ position: 'relative', zIndex: 10, maxWidth: 1200, margin: '0 auto', padding: '32px 20px' }}>
+
+        {/* ── Welcome Section ── */}
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 6 }}>
+            <div style={{
+              width: 46, height: 46, borderRadius: 12,
+              background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
+              boxShadow: '0 4px 15px rgba(168,85,247,0.35)'
+            }}>⚖️</div>
+            <div>
+              <h1 style={{ fontSize: 28, fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>
+                Welcome back, {localStorage.getItem('userName') || 'User'}! 👋
+              </h1>
+              <p style={{ color: '#94a3b8', fontSize: 14 }}>Generate professional legal drafts in seconds</p>
+            </div>
+          </div>
         </div>
 
-        {/* Error Message */}
+        {/* ── Error Message ── */}
         {error && (
-          <div className="mb-6 bg-red-500 bg-opacity-20 border border-red-500 text-red-200 px-6 py-4 rounded-lg animate-pulse">
+          <div style={{
+            marginBottom: 20, padding: '14px 20px', borderRadius: 12,
+            background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.4)',
+            color: '#fca5a5', fontSize: 14, fontWeight: 600
+          }}>
             {error}
           </div>
         )}
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="card bg-gradient-to-br from-purple-600 to-purple-800">
-            <p className="text-purple-200 text-sm">Total Drafts</p>
-            <p className="text-4xl font-bold text-white mt-2">{drafts.length}</p>
-          </div>
-          <div className="card bg-gradient-to-br from-blue-600 to-blue-800">
-            <p className="text-blue-200 text-sm">This Month</p>
-            <p className="text-4xl font-bold text-white mt-2">12</p>
-          </div>
-          <div className="card bg-gradient-to-br from-green-600 to-green-800">
-            <p className="text-green-200 text-sm">Templates Used</p>
-            <p className="text-4xl font-bold text-white mt-2">8</p>
-          </div>
-          <div className="card bg-gradient-to-br from-orange-600 to-orange-800">
-            <p className="text-orange-200 text-sm">Time Saved</p>
-            <p className="text-4xl font-bold text-white mt-2">24h</p>
-          </div>
+        {/* ── Quick Stats ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
+          {statCards.map((s, i) => (
+            <div key={i} className="card glass-hover" style={{
+              padding: '22px 24px', textAlign: 'center',
+              borderTop: `3px solid ${s.color}`,
+              background: 'rgba(15,23,42,0.7)',
+            }}>
+              <span style={{ fontSize: 28, display: 'block', marginBottom: 8 }}>{s.icon}</span>
+              <p style={{ color: '#94a3b8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 8 }}>{s.label}</p>
+              <p style={{ fontSize: 32, fontWeight: 900, color: '#fff' }}>{s.value}</p>
+            </div>
+          ))}
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* ── Main Content Grid ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 20 }}>
+
           {/* Left Sidebar */}
-          <div className="lg:col-span-1 space-y-6 animate-slide-in-left">
-            {/* Form Card */}
-            <div className="card">
-              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
-                Generate New Draft
-              </h2>
-              <DraftForm 
-                onGenerateDraft={handleGenerateDraft} 
-                isLoading={isLoading}
-                templateData={templateData}
-              />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+            {/* Generate New Draft */}
+            <div className="card" style={{ padding: 0, overflow: 'hidden', background: 'rgba(15,23,42,0.7)', border: '1px solid rgba(148,163,184,0.15)' }}>
+              <div style={{
+                padding: '16px 22px', borderBottom: '1px solid rgba(148,163,184,0.1)',
+                display: 'flex', alignItems: 'center', gap: 10,
+                background: 'rgba(168,85,247,0.04)'
+              }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#a855f7' }} />
+                <span style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>Generate New Draft</span>
+              </div>
+              <div style={{ padding: '22px 24px' }}>
+                <DraftForm
+                  onGenerateDraft={handleGenerateDraft}
+                  isLoading={isLoading}
+                  templateData={templateData}
+                />
+              </div>
             </div>
 
-            {/* Drafts List Card */}
-            <div className="card">
-              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
-                Your Drafts ({drafts.length})
-              </h2>
-              <DraftList 
-                drafts={drafts} 
-                onSelectDraft={(draft) => {
-                  setSelectedDraft(draft);
-                  setDraftText(draft.draftText || '');
-                }} 
-              />
+            {/* Drafts List */}
+            <div className="card" style={{ padding: 0, overflow: 'hidden', background: 'rgba(15,23,42,0.7)', border: '1px solid rgba(148,163,184,0.15)' }}>
+              <div style={{
+                padding: '16px 22px', borderBottom: '1px solid rgba(148,163,184,0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                background: 'rgba(59,130,246,0.04)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#3b82f6' }} />
+                  <span style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>Your Drafts</span>
+                </div>
+                <span style={{ fontSize: 11, color: '#64748b', background: 'rgba(100,116,139,0.15)', padding: '3px 10px', borderRadius: 20, fontWeight: 700 }}>{drafts.length}</span>
+              </div>
+              <div style={{ padding: '16px 20px', maxHeight: 400, overflowY: 'auto' }} className="activity-scroll">
+                <DraftList
+                  drafts={drafts}
+                  onSelectDraft={(draft) => {
+                    setSelectedDraft(draft);
+                    setDraftText(draft.draftText || '');
+                  }}
+                />
+              </div>
             </div>
           </div>
 
-          {/* Right Content */}
-          <div className="lg:col-span-2 animate-slide-in-right">
-            <div className="card">
-              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
-                Draft Editor
-              </h2>
+          {/* Right Content — Draft Editor */}
+          <div className="card" style={{ padding: 0, overflow: 'hidden', background: 'rgba(15,23,42,0.7)', border: '1px solid rgba(148,163,184,0.15)' }}>
+            <div style={{
+              padding: '16px 22px', borderBottom: '1px solid rgba(148,163,184,0.1)',
+              display: 'flex', alignItems: 'center', gap: 10,
+              background: 'rgba(16,185,129,0.04)'
+            }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
+              <span style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>Draft Editor</span>
+            </div>
+            <div style={{ padding: '22px 24px' }}>
               <DraftEditor
                 draftText={draftText}
                 onDraftChange={setDraftText}
@@ -182,6 +210,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+
       </div>
     </Layout>
   );

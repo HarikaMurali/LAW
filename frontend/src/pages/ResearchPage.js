@@ -52,345 +52,405 @@ const ResearchPage = () => {
     alert('Copied to clipboard!');
   };
 
+  const tabConfig = {
+    caseLaw:    { emoji: '📚', label: 'Case Law Database', color: '#3b82f6', desc: 'Search cases, citations, or legal issues…' },
+    statutes:   { emoji: '📖', label: 'Statute Reference',  color: '#10b981', desc: 'Search statutes, acts, or sections…' },
+    dictionary: { emoji: '📘', label: 'Legal Dictionary',   color: '#a855f7', desc: 'Search legal terms or definitions…' },
+  };
+
+  const tab = tabConfig[activeTab];
+
   return (
     <Layout>
-      <div className="animate-fade-in-up">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-5xl font-bold text-white mb-4 flex items-center justify-center gap-3">
-            🔍 Legal Research Tools
-          </h1>
-          <p className="text-slate-400 text-lg">
-            AI-powered Indian legal research - Cases, Statutes & Definitions
-          </p>
-        </div>
+      <div className="animate-fade-in-up" style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 20px' }}>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="card bg-gradient-to-br from-blue-600 to-blue-800 hover:scale-105 transition-transform cursor-pointer"
-               onClick={() => setActiveTab('caseLaw')}>
-            <div className="flex items-center gap-4">
-              <div className="text-5xl">📚</div>
-              <div>
-                <p className="text-blue-200 text-sm">Case Law Database</p>
-                <p className="text-3xl font-bold text-white mt-1">AI-Powered</p>
-                <p className="text-blue-300 text-xs mt-1">Gemini AI Research</p>
-              </div>
+        {/* ── Header ── */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 6 }}>
+              <div style={{
+                width: 46, height: 46, borderRadius: 12,
+                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
+                boxShadow: '0 4px 15px rgba(59,130,246,0.35)'
+              }}>🔍</div>
+              <h1 style={{ fontSize: 28, fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>Legal Research</h1>
             </div>
-          </div>
-          <div className="card bg-gradient-to-br from-green-600 to-green-800 hover:scale-105 transition-transform cursor-pointer"
-               onClick={() => setActiveTab('statutes')}>
-            <div className="flex items-center gap-4">
-              <div className="text-5xl">📖</div>
-              <div>
-                <p className="text-green-200 text-sm">Indian Statutes</p>
-                <p className="text-3xl font-bold text-white mt-1">AI-Powered</p>
-                <p className="text-green-300 text-xs mt-1">Gemini AI Research</p>
-              </div>
-            </div>
-          </div>
-          <div className="card bg-gradient-to-br from-purple-600 to-purple-800 hover:scale-105 transition-transform cursor-pointer"
-               onClick={() => setActiveTab('dictionary')}>
-            <div className="flex items-center gap-4">
-              <div className="text-5xl">📘</div>
-              <div>
-                <p className="text-purple-200 text-sm">Legal Dictionary</p>
-                <p className="text-3xl font-bold text-white mt-1">AI-Powered</p>
-                <p className="text-purple-300 text-xs mt-1">Gemini AI Definitions</p>
-              </div>
-            </div>
+            <p style={{ color: '#94a3b8', fontSize: 14, marginLeft: 60 }}>AI-powered Indian legal research — Cases, Statutes & Definitions</p>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="card mb-6">
-          <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
-            <button
-              onClick={() => setActiveTab('caseLaw')}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 whitespace-nowrap ${
-                activeTab === 'caseLaw'
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg shadow-blue-500/30 scale-105'
-                  : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
-              }`}
-            >
-              <span className="text-xl">📚</span>
-              Case Law Database
-            </button>
-            <button
-              onClick={() => setActiveTab('statutes')}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 whitespace-nowrap ${
-                activeTab === 'statutes'
-                  ? 'bg-gradient-to-r from-green-600 to-green-800 text-white shadow-lg shadow-green-500/30 scale-105'
-                  : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
-              }`}
-            >
-              <span className="text-xl">📖</span>
-              Statute Reference
-            </button>
-            <button
-              onClick={() => setActiveTab('dictionary')}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 whitespace-nowrap ${
-                activeTab === 'dictionary'
-                  ? 'bg-gradient-to-r from-purple-600 to-purple-800 text-white shadow-lg shadow-purple-500/30 scale-105'
-                  : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
-              }`}
-            >
-              <span className="text-xl">📘</span>
-              Legal Dictionary
-            </button>
+        {/* ── Category Cards ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 28 }}>
+          {Object.entries(tabConfig).map(([key, t]) => {
+            const isActive = activeTab === key;
+            return (
+              <div key={key} className="card" onClick={() => setActiveTab(key)} style={{
+                padding: '22px 24px', cursor: 'pointer',
+                borderTop: `3px solid ${t.color}`,
+                background: isActive ? `${t.color}15` : 'rgba(15,23,42,0.7)',
+                border: isActive ? `1px solid ${t.color}55` : '1px solid rgba(148,163,184,0.15)',
+                borderTopWidth: 3, borderTopColor: t.color,
+                transition: 'all 0.25s ease',
+                transform: isActive ? 'translateY(-2px)' : 'none',
+                boxShadow: isActive ? `0 8px 25px ${t.color}25` : 'none',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <span style={{ fontSize: 36 }}>{t.emoji}</span>
+                  <div>
+                    <p style={{ color: '#fff', fontSize: 16, fontWeight: 700 }}>{t.label}</p>
+                    <p style={{ color: '#64748b', fontSize: 12, marginTop: 2 }}>Gemini AI Research</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Search & Filter Tab ── */}
+        <div className="card" style={{
+          marginBottom: 28, padding: 0, overflow: 'hidden',
+          border: `1px solid ${tab.color}40`,
+          background: 'rgba(15,23,42,0.8)'
+        }}>
+          {/* Tab Header */}
+          <div style={{
+            padding: '14px 24px',
+            borderBottom: '1px solid rgba(148,163,184,0.15)',
+            display: 'flex', alignItems: 'center', gap: 10,
+            background: `${tab.color}08`
+          }}>
+            <span style={{ fontSize: 18 }}>{tab.emoji}</span>
+            <span style={{ color: tab.color, fontWeight: 700, fontSize: 15, letterSpacing: '0.5px' }}>{tab.label}</span>
+            {searchResults.length > 0 && (
+              <span style={{
+                marginLeft: 'auto', fontSize: 12, color: '#64748b',
+                background: 'rgba(100,116,139,0.15)', padding: '3px 10px', borderRadius: 20
+              }}>{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}</span>
+            )}
           </div>
 
-          {/* Search Bar */}
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <span className="text-slate-400 text-xl">🔍</span>
+          {/* Large Search Input */}
+          <div style={{ padding: '22px 24px 18px' }}>
+            <div style={{ position: 'relative' }}>
+              <span style={{
+                position: 'absolute', left: 20, top: '50%', transform: 'translateY(-50%)',
+                fontSize: 22, opacity: 0.5
+              }}>🔍</span>
+              <input
+                type="text"
+                placeholder={tab.desc}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                className="input-field"
+                style={{
+                  paddingLeft: 56, paddingRight: 150,
+                  padding: '18px 150px 18px 56px',
+                  fontSize: 16, borderRadius: 14,
+                  background: 'rgba(30,41,59,0.9)',
+                  border: '1px solid rgba(148,163,184,0.2)',
+                  color: '#e2e8f0',
+                }}
+              />
+              <button
+                onClick={handleSearch}
+                disabled={isSearching}
+                className="btn-primary"
+                style={{
+                  position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+                  padding: '12px 24px', borderRadius: 10, fontSize: 14,
+                  background: `linear-gradient(135deg, ${tab.color}, ${tab.color}cc)`,
+                  boxShadow: `0 4px 15px ${tab.color}40`,
+                  opacity: isSearching ? 0.6 : 1,
+                }}
+              >
+                {isSearching ? '⏳ Searching…' : '🔎 Search'}
+              </button>
             </div>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder={
-                activeTab === 'caseLaw' ? 'Search cases, citations, or legal issues...' :
-                activeTab === 'statutes' ? 'Search statutes, acts, or sections...' :
-                'Search legal terms or definitions...'
-              }
-              style={{ color: '#000', backgroundColor: '#fff' }}
-              className="w-full pl-12 pr-32 py-4 border-2 border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg placeholder-slate-500"
-            />
-            <button
-              onClick={handleSearch}
-              disabled={isSearching}
-              className="absolute right-2 top-1/2 -translate-y-1/2 px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-purple-900 transition-all disabled:opacity-50 shadow-lg"
-            >
-              {isSearching ? '⏳ Searching...' : '🔎 Search'}
-            </button>
+          </div>
+
+          {/* Tab Switcher Pills */}
+          <div style={{ padding: '0 24px 18px', display: 'flex', gap: 8 }}>
+            {Object.entries(tabConfig).map(([key, t]) => {
+              const isActive = activeTab === key;
+              return (
+                <button key={key} onClick={() => setActiveTab(key)} style={{
+                  padding: '8px 18px', borderRadius: 10, fontSize: 13, fontWeight: 600,
+                  cursor: 'pointer', transition: 'all 0.2s', border: 'none',
+                  background: isActive ? `${t.color}22` : 'rgba(30,41,59,0.6)',
+                  color: isActive ? t.color : '#94a3b8',
+                  outline: isActive ? `1px solid ${t.color}44` : '1px solid transparent',
+                }}>
+                  {t.emoji} {t.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Content Area */}
+        {/* ── Content: Case Law ── */}
         {activeTab === 'caseLaw' && (
-          <div className="space-y-6">
+          <div>
             {searchResults.length > 0 ? (
-              <div className="grid grid-cols-1 gap-6">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {searchResults.map((caseItem) => (
-                  <div key={caseItem.id} className="card glass-hover border-l-4 border-blue-500 hover:border-blue-400 transition-all">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="text-3xl">⚖️</span>
-                          <div className="flex-1">
-                            <h3 className="text-2xl font-bold text-white hover:text-blue-400 transition">{caseItem.title}</h3>
-                            <p className="text-blue-400 font-mono text-lg mt-1 flex items-center gap-2">
-                              📑 {caseItem.citation}
-                            </p>
+                  <div key={caseItem.id} className="card glass-hover" style={{
+                    padding: 0, overflow: 'hidden',
+                    borderLeft: '4px solid #3b82f6',
+                    background: 'rgba(15,23,42,0.7)',
+                  }}>
+                    <div style={{ padding: '24px 26px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, marginBottom: 14 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                            <span style={{ fontSize: 28 }}>⚖️</span>
+                            <h3 style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>{caseItem.title}</h3>
+                          </div>
+                          <p style={{ color: '#60a5fa', fontFamily: 'monospace', fontSize: 14, marginLeft: 42 }}>📑 {caseItem.citation}</p>
+                          <div style={{ display: 'flex', gap: 16, marginTop: 8, marginLeft: 42 }}>
+                            <span style={{ color: '#64748b', fontSize: 13 }}>🏛️ {caseItem.court}</span>
+                            <span style={{ color: '#64748b', fontSize: 13 }}>📅 {caseItem.year}</span>
                           </div>
                         </div>
-                        <div className="flex gap-4 text-sm text-slate-400 mb-3 ml-12">
-                          <span className="flex items-center gap-1">🏛️ {caseItem.court}</span>
-                          <span className="flex items-center gap-1">📅 {caseItem.year}</span>
-                        </div>
+                        <span style={{
+                          padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                          background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)',
+                          color: '#60a5fa', whiteSpace: 'nowrap', flexShrink: 0,
+                        }}>{caseItem.relevance}</span>
                       </div>
-                      <span className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-full text-sm font-semibold shadow-lg">
-                        {caseItem.relevance}
-                      </span>
-                    </div>
-                    <p className="text-slate-300 leading-relaxed mb-4 text-base ml-12 bg-slate-800/50 p-4 rounded-lg">{caseItem.summary}</p>
-                    <div className="flex gap-3 ml-12">
-                      <button
-                        onClick={() => handleCopyToClipboard(caseItem.citation)}
-                        className="flex-1 px-4 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-all text-sm font-semibold flex items-center justify-center gap-2"
-                      >
-                        📋 Copy Citation
-                      </button>
-                      <button
-                        onClick={() => handleCopyToClipboard(`${caseItem.title}\n${caseItem.citation}\n${caseItem.summary}`)}
-                        className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg hover:from-blue-700 hover:to-blue-900 transition-all text-sm font-semibold flex items-center justify-center gap-2 shadow-lg"
-                      >
-                        📄 Copy Case Details
-                      </button>
+                      <div style={{
+                        background: 'rgba(30,41,59,0.5)', borderRadius: 10, padding: 16,
+                        marginLeft: 42, marginBottom: 16,
+                      }}>
+                        <p style={{ color: '#cbd5e1', fontSize: 14, lineHeight: 1.7 }}>{caseItem.summary}</p>
+                      </div>
+                      <div style={{ display: 'flex', gap: 10, marginLeft: 42 }}>
+                        <button onClick={() => handleCopyToClipboard(caseItem.citation)} style={{
+                          flex: 1, padding: '10px 16px', borderRadius: 10, fontSize: 13, fontWeight: 600,
+                          background: 'rgba(30,41,59,0.8)', border: '1px solid rgba(148,163,184,0.15)',
+                          color: '#e2e8f0', cursor: 'pointer', transition: 'all 0.2s',
+                        }}>📋 Copy Citation</button>
+                        <button onClick={() => handleCopyToClipboard(`${caseItem.title}\n${caseItem.citation}\n${caseItem.summary}`)}
+                          className="btn-primary" style={{
+                            flex: 1, padding: '10px 16px', borderRadius: 10, fontSize: 13,
+                            background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                            boxShadow: '0 4px 15px rgba(59,130,246,0.3)',
+                          }}>📄 Copy Case Details</button>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="card text-center py-16 bg-gradient-to-br from-slate-800 to-slate-900">
-                <div className="text-8xl mb-6">📚</div>
-                <h3 className="text-3xl font-bold text-white mb-4">AI-Powered Case Law Research</h3>
-                <p className="text-slate-400 text-lg mb-8 max-w-2xl mx-auto">
+              /* Empty state */
+              <div className="card" style={{ textAlign: 'center', padding: '50px 30px', background: 'rgba(15,23,42,0.7)' }}>
+                <div style={{ fontSize: 64, marginBottom: 20 }}>📚</div>
+                <h3 style={{ fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 10 }}>AI-Powered Case Law Research</h3>
+                <p style={{ color: '#94a3b8', fontSize: 15, marginBottom: 32, maxWidth: 500, margin: '0 auto 32px' }}>
                   Search for Indian Supreme Court and High Court judgments using AI
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                  <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
-                       onClick={() => { setSearchQuery("Fundamental Rights"); handleSearch(); }}>
-                    <p className="text-blue-200 font-semibold mb-2 text-sm">Try searching:</p>
-                    <p className="text-white text-lg font-bold">"Fundamental Rights"</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
-                       onClick={() => { setSearchQuery("Article 21"); handleSearch(); }}>
-                    <p className="text-purple-200 font-semibold mb-2 text-sm">Or by article:</p>
-                    <p className="text-white text-lg font-bold">"Article 21"</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
-                       onClick={() => { setSearchQuery("Kesavananda Bharati"); handleSearch(); }}>
-                    <p className="text-green-200 font-semibold mb-2 text-sm">Or case name:</p>
-                    <p className="text-white text-lg font-bold">"Kesavananda Bharati"</p>
-                  </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, maxWidth: 650, margin: '0 auto' }}>
+                  {[
+                    { label: 'Try searching:', term: 'Fundamental Rights', color: '#3b82f6' },
+                    { label: 'Or by article:', term: 'Article 21', color: '#a855f7' },
+                    { label: 'Or case name:', term: 'Kesavananda Bharati', color: '#10b981' },
+                  ].map((s, i) => (
+                    <div key={i} onClick={() => { setSearchQuery(s.term); }} style={{
+                      padding: '18px 16px', borderRadius: 12, cursor: 'pointer',
+                      background: `${s.color}18`, border: `1px solid ${s.color}35`,
+                      transition: 'all 0.2s',
+                    }}>
+                      <p style={{ color: '#94a3b8', fontSize: 11, fontWeight: 600, marginBottom: 6 }}>{s.label}</p>
+                      <p style={{ color: '#fff', fontSize: 15, fontWeight: 700 }}>"{s.term}"</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
           </div>
         )}
 
+        {/* ── Content: Statutes ── */}
         {activeTab === 'statutes' && (
-          <div className="space-y-6">
+          <div>
             {searchResults.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
                 {searchResults.map((statute) => (
-                  <div key={statute.id} className="card glass-hover border-l-4 border-green-500 hover:border-green-400 transition-all">
-                    <div className="flex items-start gap-4 mb-4">
-                      <span className="text-4xl">📜</span>
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold text-white mb-2 hover:text-green-400 transition">{statute.title}</h3>
-                        <div className="flex items-center gap-2">
-                          <span className="px-3 py-1 bg-gradient-to-r from-green-600 to-green-800 text-white rounded-full text-sm font-semibold shadow-lg">
-                            {statute.sections}
-                          </span>
+                  <div key={statute.id} className="card glass-hover" style={{
+                    padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                    borderLeft: '4px solid #10b981',
+                    background: 'rgba(15,23,42,0.7)',
+                  }}>
+                    <div style={{ padding: '22px 24px', flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
+                        <span style={{ fontSize: 30, flexShrink: 0 }}>📜</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <h3 style={{ fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 8 }}>{statute.title}</h3>
+                          <span style={{
+                            display: 'inline-block', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700,
+                            background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)',
+                            color: '#34d399',
+                          }}>{statute.sections}</span>
                         </div>
                       </div>
-                    </div>
-                    <p className="text-slate-300 leading-relaxed mb-4 text-sm bg-slate-800/50 p-4 rounded-lg">{statute.description}</p>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {statute.keywords.split(',').map((keyword, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-green-600/20 text-green-300 rounded-full text-xs border border-green-500/30">
-                          {keyword.trim()}
-                        </span>
-                      ))}
-                    </div>
-                    <button 
-                      onClick={() => handleCopyToClipboard(`${statute.title}\n${statute.description}`)}
-                      className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-800 text-white rounded-lg hover:from-green-700 hover:to-green-900 transition-all text-sm font-semibold shadow-lg flex items-center justify-center gap-2">
-                      📋 Copy Details
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="card text-center py-16 bg-gradient-to-br from-slate-800 to-slate-900">
-                <div className="text-8xl mb-6">📖</div>
-                <h3 className="text-3xl font-bold text-white mb-4">Search Indian Statutes & Acts</h3>
-                <p className="text-slate-400 text-lg mb-8">
-                  Search for IPC sections, bare acts, and legal provisions from Indian Kanoon
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                  <div className="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
-                       onClick={() => { setSearchQuery("Indian Penal Code"); handleSearch(); }}>
-                    <p className="text-green-200 font-semibold mb-2 text-sm">Try searching:</p>
-                    <p className="text-white text-lg font-bold">"Indian Penal Code"</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
-                       onClick={() => { setSearchQuery("Section 302 IPC"); handleSearch(); }}>
-                    <p className="text-blue-200 font-semibold mb-2 text-sm">Or by section:</p>
-                    <p className="text-white text-lg font-bold">"Section 302 IPC"</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
-                       onClick={() => { setSearchQuery("Contract Act"); handleSearch(); }}>
-                    <p className="text-purple-200 font-semibold mb-2 text-sm">Or by act:</p>
-                    <p className="text-white text-lg font-bold">"Contract Act"</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'dictionary' && (
-          <div className="space-y-6">
-            {searchResults.length > 0 ? (
-              <div className="grid grid-cols-1 gap-6">
-                {searchResults.map((term, idx) => (
-                  <div key={idx} className="card glass-hover border-l-4 border-purple-500 hover:border-purple-400 transition-all">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl">📖</span>
-                        <h3 className="text-2xl font-bold text-white hover:text-purple-400 transition">{term.term}</h3>
+                      <div style={{
+                        background: 'rgba(30,41,59,0.5)', borderRadius: 10, padding: 14, marginBottom: 14,
+                      }}>
+                        <p style={{ color: '#cbd5e1', fontSize: 13, lineHeight: 1.65 }}>{statute.description}</p>
                       </div>
-                      <span className="px-3 py-1 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-full text-xs font-semibold shadow-lg whitespace-nowrap">
-                        {term.category}
-                      </span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
+                        {statute.keywords.split(',').map((keyword, idx) => (
+                          <span key={idx} style={{
+                            padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
+                            background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)',
+                            color: '#6ee7b7',
+                          }}>{keyword.trim()}</span>
+                        ))}
+                      </div>
                     </div>
-                    <div className="bg-slate-800/50 p-4 rounded-lg mb-4">
-                      <div className="text-slate-300 leading-relaxed text-sm whitespace-pre-wrap">{term.definition}</div>
+                    <div style={{ padding: '0 24px 20px' }}>
+                      <button onClick={() => handleCopyToClipboard(`${statute.title}\n${statute.description}`)}
+                        className="btn-primary" style={{
+                          width: '100%', padding: '11px 16px', borderRadius: 10, fontSize: 13,
+                          background: 'linear-gradient(135deg, #10b981, #059669)',
+                          boxShadow: '0 4px 15px rgba(16,185,129,0.3)',
+                        }}>📋 Copy Details</button>
                     </div>
-                    <button
-                      onClick={() => handleCopyToClipboard(`${term.term}: ${term.definition}`)}
-                      className="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg hover:from-purple-700 hover:to-purple-900 transition-all text-sm font-semibold shadow-lg flex items-center justify-center gap-2"
-                    >
-                      📋 Copy Definition
-                    </button>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="card text-center py-16 bg-gradient-to-br from-slate-800 to-slate-900">
-                <div className="text-8xl mb-6">📘</div>
-                <h3 className="text-3xl font-bold text-white mb-4">AI-Powered Legal Dictionary</h3>
-                <p className="text-slate-400 text-lg mb-8">
-                  Get instant AI-generated definitions for legal terms, IPC sections, and concepts
+              <div className="card" style={{ textAlign: 'center', padding: '50px 30px', background: 'rgba(15,23,42,0.7)' }}>
+                <div style={{ fontSize: 64, marginBottom: 20 }}>📖</div>
+                <h3 style={{ fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 10 }}>Search Indian Statutes & Acts</h3>
+                <p style={{ color: '#94a3b8', fontSize: 15, marginBottom: 32, maxWidth: 500, margin: '0 auto 32px' }}>
+                  Search for IPC sections, bare acts, and legal provisions
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                  <div className="bg-gradient-to-br from-purple-600 to-purple-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
-                       onClick={() => { setSearchQuery("IPC 302"); handleSearch(); }}>
-                    <p className="text-purple-200 font-semibold mb-2 text-sm">Try searching:</p>
-                    <p className="text-white text-lg font-bold">"IPC 302"</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
-                       onClick={() => { setSearchQuery("Habeas Corpus"); handleSearch(); }}>
-                    <p className="text-blue-200 font-semibold mb-2 text-sm">Or Latin terms:</p>
-                    <p className="text-white text-lg font-bold">"Habeas Corpus"</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-xl hover:scale-105 transition-transform cursor-pointer"
-                       onClick={() => { setSearchQuery("Mens Rea"); handleSearch(); }}>
-                    <p className="text-green-200 font-semibold mb-2 text-sm">Or concepts:</p>
-                    <p className="text-white text-lg font-bold">"Mens Rea"</p>
-                  </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, maxWidth: 650, margin: '0 auto' }}>
+                  {[
+                    { label: 'Try searching:', term: 'Indian Penal Code', color: '#10b981' },
+                    { label: 'Or by section:', term: 'Section 302 IPC', color: '#3b82f6' },
+                    { label: 'Or by act:', term: 'Contract Act', color: '#a855f7' },
+                  ].map((s, i) => (
+                    <div key={i} onClick={() => { setSearchQuery(s.term); }} style={{
+                      padding: '18px 16px', borderRadius: 12, cursor: 'pointer',
+                      background: `${s.color}18`, border: `1px solid ${s.color}35`,
+                      transition: 'all 0.2s',
+                    }}>
+                      <p style={{ color: '#94a3b8', fontSize: 11, fontWeight: 600, marginBottom: 6 }}>{s.label}</p>
+                      <p style={{ color: '#fff', fontSize: 15, fontWeight: 700 }}>"{s.term}"</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
           </div>
         )}
 
-        {/* Quick Tips */}
-        <div className="card mt-8 bg-gradient-to-r from-slate-800 to-slate-900 border-l-4 border-yellow-500">
-          <div className="flex items-start gap-4">
-            <span className="text-4xl">💡</span>
-            <div>
-              <h3 className="text-2xl font-bold text-white mb-4">Research Tips</h3>
-              <ul className="space-y-3 text-slate-300">
-                <li className="flex items-start gap-2">
-                  <span className="text-yellow-400 font-bold">•</span>
-                  <span>Use specific keywords for more accurate results</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-yellow-400 font-bold">•</span>
-                  <span>Search by case name, citation, or legal principle</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-yellow-400 font-bold">•</span>
-                  <span>Citations can be directly inserted into your drafts</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-yellow-400 font-bold">•</span>
-                  <span>Bookmark frequently used statutes and cases</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-yellow-400 font-bold">•</span>
-                  <span>All research is saved in your history for future reference</span>
-                </li>
-              </ul>
+        {/* ── Content: Dictionary ── */}
+        {activeTab === 'dictionary' && (
+          <div>
+            {searchResults.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {searchResults.map((term, idx) => (
+                  <div key={idx} className="card glass-hover" style={{
+                    padding: 0, overflow: 'hidden',
+                    borderLeft: '4px solid #a855f7',
+                    background: 'rgba(15,23,42,0.7)',
+                  }}>
+                    <div style={{ padding: '24px 26px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <span style={{ fontSize: 28 }}>📖</span>
+                          <h3 style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>{term.term}</h3>
+                        </div>
+                        <span style={{
+                          padding: '5px 14px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+                          background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)',
+                          color: '#c084fc',
+                        }}>{term.category}</span>
+                      </div>
+                      <div style={{
+                        background: 'rgba(30,41,59,0.5)', borderRadius: 10, padding: 18, marginBottom: 16,
+                      }}>
+                        <div style={{ color: '#cbd5e1', fontSize: 14, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{term.definition}</div>
+                      </div>
+                      <button onClick={() => handleCopyToClipboard(`${term.term}: ${term.definition}`)}
+                        className="btn-primary" style={{
+                          width: '100%', padding: '12px 16px', borderRadius: 10, fontSize: 13,
+                          background: 'linear-gradient(135deg, #a855f7, #7c3aed)',
+                          boxShadow: '0 4px 15px rgba(168,85,247,0.3)',
+                        }}>📋 Copy Definition</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="card" style={{ textAlign: 'center', padding: '50px 30px', background: 'rgba(15,23,42,0.7)' }}>
+                <div style={{ fontSize: 64, marginBottom: 20 }}>📘</div>
+                <h3 style={{ fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 10 }}>AI-Powered Legal Dictionary</h3>
+                <p style={{ color: '#94a3b8', fontSize: 15, marginBottom: 32, maxWidth: 500, margin: '0 auto 32px' }}>
+                  Get instant AI definitions for legal terms, IPC sections & concepts
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, maxWidth: 650, margin: '0 auto' }}>
+                  {[
+                    { label: 'Try searching:', term: 'IPC 302', color: '#a855f7' },
+                    { label: 'Or Latin terms:', term: 'Habeas Corpus', color: '#3b82f6' },
+                    { label: 'Or concepts:', term: 'Mens Rea', color: '#10b981' },
+                  ].map((s, i) => (
+                    <div key={i} onClick={() => { setSearchQuery(s.term); }} style={{
+                      padding: '18px 16px', borderRadius: 12, cursor: 'pointer',
+                      background: `${s.color}18`, border: `1px solid ${s.color}35`,
+                      transition: 'all 0.2s',
+                    }}>
+                      <p style={{ color: '#94a3b8', fontSize: 11, fontWeight: 600, marginBottom: 6 }}>{s.label}</p>
+                      <p style={{ color: '#fff', fontSize: 15, fontWeight: 700 }}>"{s.term}"</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Quick Tips ── */}
+        <div className="card" style={{
+          marginTop: 32, padding: 0, overflow: 'hidden',
+          borderLeft: '4px solid #f59e0b',
+          background: 'rgba(15,23,42,0.7)',
+        }}>
+          <div style={{
+            padding: '14px 24px',
+            borderBottom: '1px solid rgba(148,163,184,0.1)',
+            display: 'flex', alignItems: 'center', gap: 10,
+            background: 'rgba(245,158,11,0.05)'
+          }}>
+            <span style={{ fontSize: 18 }}>💡</span>
+            <span style={{ color: '#fbbf24', fontWeight: 700, fontSize: 15, letterSpacing: '0.5px' }}>Research Tips</span>
+          </div>
+          <div style={{ padding: '20px 24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+              {[
+                { icon: '🎯', text: 'Use specific keywords for more accurate results' },
+                { icon: '📑', text: 'Search by case name, citation, or legal principle' },
+                { icon: '📝', text: 'Citations can be directly inserted into your drafts' },
+                { icon: '⭐', text: 'Bookmark frequently used statutes and cases' },
+                { icon: '🕐', text: 'All research is saved in your history for reference' },
+              ].map((tip, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '12px 16px', borderRadius: 10,
+                  background: 'rgba(30,41,59,0.5)', border: '1px solid rgba(148,163,184,0.08)',
+                }}>
+                  <span style={{ fontSize: 20, flexShrink: 0 }}>{tip.icon}</span>
+                  <p style={{ color: '#cbd5e1', fontSize: 13, lineHeight: 1.5 }}>{tip.text}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
+
       </div>
     </Layout>
   );

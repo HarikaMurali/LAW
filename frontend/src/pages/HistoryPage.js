@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import axios from '../utils/axios';
+import { formatDate as sharedFormatDate } from '../utils/dateFormat';
 import '../App.css';
 
 const HistoryPage = () => {
@@ -139,16 +140,7 @@ const HistoryPage = () => {
     }
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  const formatDate = (dateString) => sharedFormatDate(dateString, { time: true, short: true });
 
   const getActionIcon = (action) => {
     const iconMap = {
@@ -202,418 +194,335 @@ const HistoryPage = () => {
     return filtered;
   };
 
+  const getActionColorHex = (action) => {
+    const colorMap = {
+      'Generated Draft': '#a855f7',
+      'Edited Draft': '#3b82f6',
+      'Deleted Draft': '#ef4444',
+      'Downloaded Draft': '#06b6d4',
+      'Proofreading': '#eab308',
+      'Clause Suggestion': '#ec4899',
+      'Case Law Search': '#10b981',
+      'Statute Search': '#f97316',
+      'Dictionary Lookup': '#6366f1',
+      'Template Used': '#f59e0b',
+      'Login': '#64748b',
+      'Registered': '#22c55e'
+    };
+    return colorMap[action] || '#94a3b8';
+  };
+
   const filteredActivities = getFilteredActivities();
 
   return (
     <Layout>
-      <div className="animate-fade-in-up">
-        {/* Header */}
-        <div className="mb-12 text-center">
-          <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 mb-4 flex items-center justify-center gap-3">
-            📊 Activity History
-          </h1>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Track all your actions and changes in real-time with comprehensive filtering and search
-          </p>
+      <div className="animate-fade-in-up" style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 20px' }}>
+
+        {/* ── Header ── */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 6 }}>
+              <div style={{
+                width: 46, height: 46, borderRadius: 12,
+                background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
+                boxShadow: '0 4px 15px rgba(168,85,247,0.35)'
+              }}>📋</div>
+              <h1 style={{ fontSize: 28, fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>Activity History</h1>
+            </div>
+            <p style={{ color: '#94a3b8', fontSize: 14, marginLeft: 60 }}>Track and filter all your actions in one place</p>
+          </div>
+          <span style={{
+            padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+            background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)',
+            color: '#c084fc',
+          }}>{filteredActivities.length} activit{filteredActivities.length !== 1 ? 'ies' : 'y'}</span>
         </div>
 
-        {/* Enhanced Filters Section - TAB BASED */}
-        <div className="card mb-10 bg-gradient-to-br from-slate-800 to-slate-900 border border-purple-500/30 hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 p-0 overflow-hidden">
-          {/* Tab Navigation */}
-          <div className="flex gap-0 bg-slate-900/50 border-b border-slate-700">
-            <button
-              onClick={() => setActiveTab('search')}
-              className={`flex-1 px-6 py-4 font-bold transition-all border-b-4 flex items-center justify-center gap-2 text-lg transform hover:scale-105 ${
-                activeTab === 'search'
-                  ? 'bg-gradient-to-r from-slate-700 to-slate-800 border-b-purple-500 text-white shadow-lg shadow-purple-500/40'
-                  : 'border-b-transparent text-slate-400 hover:text-slate-300'
-              }`}
-            >
-              🔍 Search
-            </button>
-            <button
-              onClick={() => setActiveTab('filters')}
-              className={`flex-1 px-6 py-4 font-bold transition-all border-b-4 flex items-center justify-center gap-2 text-lg transform hover:scale-105 ${
-                activeTab === 'filters'
-                  ? 'bg-gradient-to-r from-slate-700 to-slate-800 border-b-blue-500 text-white shadow-lg shadow-blue-500/40'
-                  : 'border-b-transparent text-slate-400 hover:text-slate-300'
-              }`}
-            >
-              ⚡ Filters
-            </button>
-            <button
-              onClick={() => setActiveTab('date')}
-              className={`flex-1 px-6 py-4 font-bold transition-all border-b-4 flex items-center justify-center gap-2 text-lg transform hover:scale-105 ${
-                activeTab === 'date'
-                  ? 'bg-gradient-to-r from-slate-700 to-slate-800 border-b-pink-500 text-white shadow-lg shadow-pink-500/40'
-                  : 'border-b-transparent text-slate-400 hover:text-slate-300'
-              }`}
-            >
-              📅 Date Range
-            </button>
+        {/* ── Filter Panel ── */}
+        <div className="card" style={{
+          marginBottom: 28, padding: 0, overflow: 'hidden',
+          border: '1px solid rgba(168,85,247,0.25)',
+          background: 'rgba(15,23,42,0.8)'
+        }}>
+          {/* Tab Bar */}
+          <div style={{
+            display: 'flex', borderBottom: '1px solid rgba(148,163,184,0.12)',
+            background: 'rgba(168,85,247,0.04)'
+          }}>
+            {[
+              { key: 'search',  icon: '🔍', label: 'Search' },
+              { key: 'filters', icon: '⚙️', label: 'Filters' },
+              { key: 'date',    icon: '📅', label: 'Date Range' }
+            ].map((t) => (
+              <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
+                flex: 1, padding: '14px 0', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                background: 'transparent', border: 'none',
+                color: activeTab === t.key ? '#fff' : '#64748b',
+                borderBottom: activeTab === t.key ? '2px solid #a855f7' : '2px solid transparent',
+                transition: 'all 0.2s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}>
+                <span style={{ fontSize: 16 }}>{t.icon}</span> {t.label}
+              </button>
+            ))}
           </div>
 
           {/* Tab Content */}
-          <div className="p-8">
+          <div style={{ padding: '22px 24px' }}>
             {/* Search Tab */}
             {activeTab === 'search' && (
-              <div className="animate-fadeIn">
-                <label className="block text-slate-300 text-sm font-bold mb-4 flex items-center gap-2">
-                  🔍 Search Activities
-                </label>
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setPage(1);
-                  }}
-                  placeholder="Search by title or description..."
-                  className="w-full px-5 py-3 bg-slate-700 border-2 border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-base font-medium"
-                />
-                <p className="text-slate-400 text-xs mt-3">💡 Tip: Search finds activities by title or description instantly</p>
+              <div>
+                <p style={{ color: '#94a3b8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 12 }}>Search activities</p>
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: 20, top: '50%', transform: 'translateY(-50%)', fontSize: 20, opacity: 0.5 }}>🔍</span>
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                    placeholder="Search by title, description, or keyword…"
+                    className="input-field"
+                    style={{
+                      padding: '16px 20px 16px 54px', fontSize: 16, borderRadius: 14,
+                      background: 'rgba(30,41,59,0.9)', border: '1px solid rgba(148,163,184,0.2)',
+                    }}
+                  />
+                </div>
+                <p style={{ color: '#475569', fontSize: 12, marginTop: 10 }}>Results update as you type</p>
               </div>
             )}
 
             {/* Filters Tab */}
             {activeTab === 'filters' && (
-              <div className="animate-fadeIn space-y-6">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <div>
-                  <label className="block text-slate-300 text-sm font-bold mb-4 flex items-center gap-2">
-                    ⚡ Filter by Action Type
-                  </label>
-                  <select
-                    value={filterAction}
-                    onChange={(e) => {
-                      setFilterAction(e.target.value);
-                      setPage(1);
-                    }}
-                    className="w-full px-5 py-3 bg-slate-700 border-2 border-slate-600 rounded-lg text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-base hover:bg-slate-600"
-                  >
-                    <option value="all" className="bg-slate-700 text-white font-medium">✨ All Actions</option>
-                    <option value="Generated Draft" className="bg-slate-700 text-white font-medium">✨ Generated Draft</option>
-                    <option value="Edited Draft" className="bg-slate-700 text-white font-medium">✏️ Edited Draft</option>
-                    <option value="Deleted Draft" className="bg-slate-700 text-white font-medium">🗑️ Deleted Draft</option>
-                    <option value="Case Law Search" className="bg-slate-700 text-white font-medium">📚 Case Law Search</option>
-                    <option value="Statute Search" className="bg-slate-700 text-white font-medium">📖 Statute Search</option>
-                    <option value="Dictionary Lookup" className="bg-slate-700 text-white font-medium">📘 Dictionary Lookup</option>
-                    <option value="Proofreading" className="bg-slate-700 text-white font-medium">🔍 Proofreading</option>
-                    <option value="Clause Suggestion" className="bg-slate-700 text-white font-medium">💡 Clause Suggestion</option>
+                  <p style={{ color: '#94a3b8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 10 }}>Action Type</p>
+                  <select value={filterAction} onChange={(e) => { setFilterAction(e.target.value); setPage(1); }}
+                    className="input-field" style={{ padding: '14px 16px', borderRadius: 12, fontSize: 14, cursor: 'pointer', background: 'rgba(30,41,59,0.9)', border: '1px solid rgba(148,163,184,0.2)' }}>
+                    <option value="all">All Actions</option>
+                    <option value="Generated Draft">✨ Generated Draft</option>
+                    <option value="Edited Draft">✏️ Edited Draft</option>
+                    <option value="Deleted Draft">🗑️ Deleted Draft</option>
+                    <option value="Case Law Search">📚 Case Law Search</option>
+                    <option value="Statute Search">📖 Statute Search</option>
+                    <option value="Dictionary Lookup">📘 Dictionary Lookup</option>
+                    <option value="Proofreading">🔍 Proofreading</option>
+                    <option value="Clause Suggestion">💡 Clause Suggestion</option>
                   </select>
                 </div>
-
                 <div>
-                  <label className="block text-slate-300 text-sm font-bold mb-4 flex items-center gap-2">
-                    📋 Filter by Case Type
-                  </label>
-                  <select
-                    value={filterType}
-                    onChange={(e) => {
-                      setFilterType(e.target.value);
-                      setPage(1);
-                    }}
-                    className="w-full px-5 py-3 bg-slate-700 border-2 border-slate-600 rounded-lg text-white font-medium focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-base hover:bg-slate-600"
-                  >
-                    <option value="all" className="bg-slate-700 text-white font-medium">📋 All Types</option>
-                    <option value="Contract" className="bg-slate-700 text-white font-medium">📜 Contract</option>
-                    <option value="Civil" className="bg-slate-700 text-white font-medium">⚖️ Civil</option>
-                    <option value="Criminal" className="bg-slate-700 text-white font-medium">🚨 Criminal</option>
-                    <option value="Family" className="bg-slate-700 text-white font-medium">👨‍👩‍👧‍👦 Family</option>
+                  <p style={{ color: '#94a3b8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 10 }}>Case Type</p>
+                  <select value={filterType} onChange={(e) => { setFilterType(e.target.value); setPage(1); }}
+                    className="input-field" style={{ padding: '14px 16px', borderRadius: 12, fontSize: 14, cursor: 'pointer', background: 'rgba(30,41,59,0.9)', border: '1px solid rgba(148,163,184,0.2)' }}>
+                    <option value="all">All Types</option>
+                    <option value="Contract">📜 Contract</option>
+                    <option value="Civil">⚖️ Civil</option>
+                    <option value="Criminal">🚨 Criminal</option>
+                    <option value="Family">👨‍👩‍👧 Family</option>
                   </select>
                 </div>
-                <p className="text-slate-400 text-xs">💡 Tip: Combine these filters for precise results</p>
               </div>
             )}
 
             {/* Date Range Tab */}
             {activeTab === 'date' && (
-              <div className="animate-fadeIn">
-                <label className="block text-slate-300 text-sm font-bold mb-6 flex items-center gap-2">
-                  📅 Select Date Range
-                </label>
-
-                {/* Date Range Sub-tabs */}
-                <div className="flex gap-3 flex-wrap mb-8">
+              <div>
+                <p style={{ color: '#94a3b8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 14 }}>Select period</p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 18 }}>
                   {[
-                    { value: 'all', label: 'All Time', emoji: '🌍', color: 'from-amber-600 to-amber-700 border-amber-400 shadow-amber-500' },
-                    { value: '7days', label: 'Last 7 Days', emoji: '📆', color: 'from-blue-600 to-blue-700 border-blue-400 shadow-blue-500' },
-                    { value: '30days', label: 'Last 30 Days', emoji: '📊', color: 'from-cyan-600 to-cyan-700 border-cyan-400 shadow-cyan-500' },
-                    { value: 'custom', label: 'Custom Range', emoji: '✏️', color: 'from-pink-600 to-pink-700 border-pink-400 shadow-pink-500' }
-                  ].map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => {
-                        setDateRange(option.value);
-                        setPage(1);
-                        if (option.value === '7days') {
-                          const d = new Date();
-                          setEndDate(d.toISOString().split('T')[0]);
-                          d.setDate(d.getDate() - 7);
-                          setStartDate(d.toISOString().split('T')[0]);
-                        } else if (option.value === '30days') {
-                          const d = new Date();
-                          setEndDate(d.toISOString().split('T')[0]);
-                          d.setDate(d.getDate() - 30);
-                          setStartDate(d.toISOString().split('T')[0]);
-                        } else {
-                          setStartDate('');
-                          setEndDate('');
-                        }
-                      }}
-                      className={`flex items-center gap-2 px-6 py-4 rounded-lg font-bold transition-all transform border-2 ${
-                        dateRange === option.value
-                          ? `bg-gradient-to-br ${option.color} text-white shadow-lg shadow-${option.color}/50`
-                          : 'bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600 hover:border-slate-500 hover:scale-105'
-                      }`}
-                    >
-                      <span className="text-xl">{option.emoji}</span>
-                      <span className="hidden sm:inline">{option.label}</span>
+                    { value: 'all',    label: 'All Time',     icon: '🌐' },
+                    { value: '7days',  label: 'Last 7 Days',  icon: '📆' },
+                    { value: '30days', label: 'Last 30 Days', icon: '📊' },
+                    { value: 'custom', label: 'Custom',       icon: '✏️' }
+                  ].map((opt) => (
+                    <button key={opt.value} onClick={() => {
+                      setDateRange(opt.value); setPage(1);
+                      if (opt.value === '7days') { const d = new Date(); setEndDate(d.toISOString().split('T')[0]); d.setDate(d.getDate() - 7); setStartDate(d.toISOString().split('T')[0]); }
+                      else if (opt.value === '30days') { const d = new Date(); setEndDate(d.toISOString().split('T')[0]); d.setDate(d.getDate() - 30); setStartDate(d.toISOString().split('T')[0]); }
+                      else { setStartDate(''); setEndDate(''); }
+                    }} style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                      padding: '14px 8px', borderRadius: 12, cursor: 'pointer', fontSize: 13, fontWeight: 700, border: 'none',
+                      background: dateRange === opt.value ? 'rgba(168,85,247,0.15)' : 'rgba(30,41,59,0.6)',
+                      outline: dateRange === opt.value ? '1px solid rgba(168,85,247,0.45)' : '1px solid rgba(148,163,184,0.12)',
+                      color: dateRange === opt.value ? '#c084fc' : '#94a3b8',
+                      transition: 'all 0.2s',
+                    }}>
+                      <span style={{ fontSize: 20 }}>{opt.icon}</span>{opt.label}
                     </button>
                   ))}
                 </div>
 
-                {/* Custom Date Range Inputs */}
                 {dateRange === 'custom' && (
-                  <div className="bg-gradient-to-br from-slate-700/60 to-slate-800/60 border-2 border-pink-500/40 rounded-lg p-8 animate-slideDown">
-                    <label className="block text-slate-200 text-sm font-bold mb-6 flex items-center gap-2">
-                      ✏️ Configure Custom Date Range
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-pink-300 text-sm font-bold mb-3 flex items-center gap-2">
-                          📍 Start Date
-                        </label>
-                        <input
-                          type="date"
-                          value={startDate}
-                          onChange={(e) => {
-                            setStartDate(e.target.value);
-                            setPage(1);
-                          }}
-                          className="w-full px-5 py-3 bg-slate-700 border-2 border-pink-500/40 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all text-base font-medium hover:border-pink-500/60"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-pink-300 text-sm font-bold mb-3 flex items-center gap-2">
-                          📍 End Date
-                        </label>
-                        <input
-                          type="date"
-                          value={endDate}
-                          onChange={(e) => {
-                            setEndDate(e.target.value);
-                            setPage(1);
-                          }}
-                          className="w-full px-5 py-3 bg-slate-700 border-2 border-pink-500/40 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all text-base font-medium hover:border-pink-500/60"
-                        />
-                      </div>
+                  <div style={{
+                    display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16,
+                    padding: 18, background: 'rgba(30,41,59,0.5)', border: '1px solid rgba(148,163,184,0.1)', borderRadius: 12
+                  }}>
+                    <div>
+                      <p style={{ color: '#64748b', fontSize: 11, fontWeight: 700, marginBottom: 8 }}>From</p>
+                      <input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+                        className="input-field" style={{ padding: '10px 14px', borderRadius: 10, fontSize: 13, background: 'rgba(30,41,59,0.9)', border: '1px solid rgba(148,163,184,0.2)' }} />
                     </div>
-                    <div className="mt-6 p-4 bg-slate-600/50 border border-pink-500/20 rounded-lg">
-                      <p className="text-pink-200 text-sm font-semibold flex items-center gap-2">
-                        ✨ {startDate && endDate ? `Showing data from ${startDate} to ${endDate}` : '📅 Select both dates to filter'}
-                      </p>
+                    <div>
+                      <p style={{ color: '#64748b', fontSize: 11, fontWeight: 700, marginBottom: 8 }}>To</p>
+                      <input type="date" value={endDate} onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+                        className="input-field" style={{ padding: '10px 14px', borderRadius: 10, fontSize: 13, background: 'rgba(30,41,59,0.9)', border: '1px solid rgba(148,163,184,0.2)' }} />
                     </div>
                   </div>
                 )}
-
-                {/* Active Date Range Display */}
-                {dateRange !== 'custom' && (
-                  <div className="bg-gradient-to-br from-slate-700/40 to-slate-800/40 border-2 border-slate-600/50 rounded-lg p-6">
-                    <p className="text-slate-300 text-sm font-semibold flex items-center gap-2">
-                      <span className="text-2xl">✅</span>
-                      {dateRange === 'all' && 'Displaying all activities from your entire history'}
-                      {dateRange === '7days' && 'Displaying activities from the last 7 days'}
-                      {dateRange === '30days' && 'Displaying activities from the last 30 days'}
-                    </p>
-                  </div>
-                )}
-
-                <p className="text-slate-400 text-xs mt-6">💡 Tip: Quick date buttons auto-calculate ranges. Custom range lets you pick specific dates.</p>
               </div>
             )}
           </div>
 
-          {/* Active Filters Display - Outside tabs, full width */}
+          {/* Active Filters Bar */}
           {(searchTerm || filterAction !== 'all' || filterType !== 'all' || dateRange !== 'all') && (
-            <div className="border-t border-slate-700 bg-slate-800/50 px-8 py-5">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="text-slate-400 font-semibold text-sm">Active Filters:</span>
-                
-                {searchTerm && (
-                  <span className="px-3 py-2 bg-purple-600/30 border border-purple-500 rounded-full text-xs text-purple-200 font-bold inline-flex items-center gap-2 hover:bg-purple-600/50 transition-all">
-                    🔍 {searchTerm}
-                    <button onClick={() => { setSearchTerm(''); setPage(1); }} className="hover:text-red-300 ml-1 font-bold">✕</button>
-                  </span>
-                )}
-                
-                {filterAction !== 'all' && (
-                  <span className="px-3 py-2 bg-blue-600/30 border border-blue-500 rounded-full text-xs text-blue-200 font-bold inline-flex items-center gap-2 hover:bg-blue-600/50 transition-all">
-                    ⚡ {filterAction}
-                    <button onClick={() => { setFilterAction('all'); setPage(1); }} className="hover:text-red-300 ml-1 font-bold">✕</button>
-                  </span>
-                )}
-                
-                {filterType !== 'all' && (
-                  <span className="px-3 py-2 bg-green-600/30 border border-green-500 rounded-full text-xs text-green-200 font-bold inline-flex items-center gap-2 hover:bg-green-600/50 transition-all">
-                    📋 {filterType}
-                    <button onClick={() => { setFilterType('all'); setPage(1); }} className="hover:text-red-300 ml-1 font-bold">✕</button>
-                  </span>
-                )}
-                
-                {dateRange !== 'all' && (
-                  <span className="px-3 py-2 bg-pink-600/30 border border-pink-500 rounded-full text-xs text-pink-200 font-bold inline-flex items-center gap-2 hover:bg-pink-600/50 transition-all">
-                    📅 {dateRange === '7days' ? 'Last 7 days' : dateRange === '30days' ? 'Last 30 days' : 'Custom range'}
-                    <button onClick={() => { setDateRange('all'); setPage(1); }} className="hover:text-red-300 ml-1 font-bold">✕</button>
-                  </span>
-                )}
-                
-                <button
-                  onClick={() => {
-                    setFilterAction('all');
-                    setFilterType('all');
-                    setSearchTerm('');
-                    setDateRange('all');
-                    setPage(1);
-                  }}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full text-xs font-bold transition-all ml-2"
-                >
-                  🗑️ Clear All
-                </button>
-              </div>
+            <div style={{
+              borderTop: '1px solid rgba(148,163,184,0.1)', background: 'rgba(15,23,42,0.4)',
+              padding: '12px 24px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8,
+            }}>
+              <span style={{ color: '#475569', fontSize: 11, fontWeight: 700, marginRight: 4 }}>Active:</span>
+              {searchTerm && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)', color: '#c084fc' }}>
+                  🔍 {searchTerm} <button onClick={() => { setSearchTerm(''); setPage(1); }} style={{ background: 'none', border: 'none', color: '#c084fc', cursor: 'pointer', fontSize: 14 }}>×</button>
+                </span>
+              )}
+              {filterAction !== 'all' && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)', color: '#60a5fa' }}>
+                  ⚙️ {filterAction} <button onClick={() => { setFilterAction('all'); setPage(1); }} style={{ background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer', fontSize: 14 }}>×</button>
+                </span>
+              )}
+              {filterType !== 'all' && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)', color: '#34d399' }}>
+                  📋 {filterType} <button onClick={() => { setFilterType('all'); setPage(1); }} style={{ background: 'none', border: 'none', color: '#34d399', cursor: 'pointer', fontSize: 14 }}>×</button>
+                </span>
+              )}
+              {dateRange !== 'all' && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: 'rgba(236,72,153,0.12)', border: '1px solid rgba(236,72,153,0.3)', color: '#f472b6' }}>
+                  📅 {dateRange === '7days' ? '7 days' : dateRange === '30days' ? '30 days' : 'Custom'}
+                  <button onClick={() => { setDateRange('all'); setPage(1); }} style={{ background: 'none', border: 'none', color: '#f472b6', cursor: 'pointer', fontSize: 14 }}>×</button>
+                </span>
+              )}
+              <button onClick={() => { setFilterAction('all'); setFilterType('all'); setSearchTerm(''); setDateRange('all'); setPage(1); }}
+                style={{ marginLeft: 'auto', fontSize: 12, fontWeight: 700, color: '#f87171', background: 'none', border: 'none', cursor: 'pointer' }}>Clear All</button>
             </div>
           )}
         </div>
 
-        {/* Activity Timeline - Enhanced */}
-        <div className="space-y-4">
-          {loading ? (
-            <div className="text-center py-20">
-              <div className="inline-flex items-center justify-center gap-3 mb-6">
-                <div className="text-6xl animate-bounce" style={{animationDelay: '0s'}}>📝</div>
-                <div className="text-6xl animate-bounce" style={{animationDelay: '0.2s'}}>⏳</div>
-                <div className="text-6xl animate-bounce" style={{animationDelay: '0.4s'}}>📊</div>
-              </div>
-              <p className="text-slate-300 text-xl font-semibold">Loading activity history...</p>
-              <p className="text-slate-500 text-sm mt-2">Fetching your recent activities</p>
+        {/* ── Activity List ── */}
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <div style={{ display: 'inline-flex', gap: 8, marginBottom: 16 }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#a855f7', animation: 'pulse 1.2s ease-in-out infinite' }} />
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#3b82f6', animation: 'pulse 1.2s ease-in-out infinite 0.2s' }} />
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#06b6d4', animation: 'pulse 1.2s ease-in-out infinite 0.4s' }} />
             </div>
-          ) : filteredActivities.length > 0 ? (
-            <>
-              <div className="mb-6 flex items-center justify-between p-4 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
-                <div className="text-sm text-slate-300 font-semibold">
-                  📊 Showing <span className="text-purple-400 font-bold">{filteredActivities.length}</span> of <span className="text-slate-400">{activities.length}</span> activities
-                </div>
-              </div>
+            <p style={{ color: '#94a3b8', fontSize: 14, fontWeight: 600 }}>Loading activity history…</p>
+          </div>
+        ) : filteredActivities.length > 0 ? (
+          <>
+            <p style={{ color: '#475569', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 16 }}>
+              {filteredActivities.length} Result{filteredActivities.length !== 1 ? 's' : ''}
+            </p>
 
-              {filteredActivities.map((activity, idx) => (
-                <div
-                  key={idx}
-                  className="group card glass-hover border-l-4 border-purple-500 hover:border-purple-300 hover:shadow-2xl hover:shadow-purple-600/30 transition-all transform hover:-translate-y-1 duration-300"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="text-5xl mt-1 group-hover:scale-125 transition-transform flex-shrink-0">{getActionIcon(activity.action)}</div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <h3 className={`text-lg font-bold ${getActionColor(activity.action)}`}>
-                          {activity.action}
-                        </h3>
-                        {activity.type && (
-                          <span className="px-3 py-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full text-xs font-bold border border-purple-400/50 shadow-lg">
-                            {activity.type}
-                          </span>
+            {/* Activity Cards */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {filteredActivities.map((activity, idx) => {
+                const color = getActionColorHex(activity.action);
+                return (
+                  <div key={idx} className="card glass-hover" style={{
+                    padding: 0, overflow: 'hidden',
+                    borderLeft: `4px solid ${color}`,
+                    background: 'rgba(15,23,42,0.7)',
+                  }}>
+                    <div style={{ padding: '18px 22px', display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+                      {/* Icon */}
+                      <div style={{
+                        width: 44, height: 44, borderRadius: 10, flexShrink: 0,
+                        background: `${color}18`, border: `1px solid ${color}30`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
+                      }}>{getActionIcon(activity.action)}</div>
+
+                      {/* Content */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: 14, fontWeight: 800, color }}>{activity.action}</span>
+                          {activity.caseType && (
+                            <span style={{
+                              padding: '2px 8px', borderRadius: 6, fontSize: 10, fontWeight: 700,
+                              background: 'rgba(100,116,139,0.15)', border: '1px solid rgba(100,116,139,0.2)',
+                              color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.8,
+                            }}>{activity.caseType}</span>
+                          )}
+                        </div>
+                        {(activity.title || activity.draftName) && (
+                          <p style={{ color: '#f1f5f9', fontSize: 14, fontWeight: 600, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {activity.title || activity.draftName}
+                          </p>
+                        )}
+                        {activity.details && (
+                          <p style={{ color: '#64748b', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activity.details}</p>
                         )}
                       </div>
-                      <p className="text-white text-base font-semibold mb-2 truncate">{activity.title}</p>
-                      {activity.details && (
-                        <p className="text-slate-300 text-sm mb-3 line-clamp-2">{activity.details}</p>
-                      )}
-                      <div className="flex items-center gap-4 flex-wrap">
-                        <p className="text-slate-400 text-xs font-semibold">
-                          ⏰ {formatDate(activity.createdAt)}
-                        </p>
-                        {activity.metadata?.searchQuery && (
-                          <span className="px-2 py-1 bg-slate-700 text-slate-300 rounded text-xs font-mono">
-                            {activity.metadata.searchQuery}
-                          </span>
-                        )}
-                        {activity.metadata?.resultsCount && (
-                          <span className="px-2 py-1 bg-blue-600/30 text-blue-300 rounded text-xs font-semibold">
-                            {activity.metadata.resultsCount} results
-                          </span>
-                        )}
-                      </div>
+
+                      {/* Timestamp */}
+                      <span style={{ color: '#475569', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                        {formatDate(activity.createdAt || activity.timestamp)}
+                      </span>
                     </div>
                   </div>
-                </div>
-              ))}
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-4 mt-10 p-6 bg-slate-800/50 rounded-lg border border-slate-700">
-                  <button
-                    onClick={() => setPage(Math.max(1, page - 1))}
-                    disabled={page === 1}
-                    className="px-6 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-600 hover:border-slate-500 transition-all font-semibold"
-                  >
-                    ← Previous
-                  </button>
-                  <div className="flex items-center gap-2">
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      const pageNum = Math.max(1, page - 2) + i;
-                      if (pageNum > totalPages) return null;
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => setPage(pageNum)}
-                          className={`px-3 py-2 rounded-lg font-semibold transition-all ${
-                            pageNum === page
-                              ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/50'
-                              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <span className="text-slate-400 font-semibold">
-                    Page {page} of {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setPage(Math.min(totalPages, page + 1))}
-                    disabled={page === totalPages}
-                    className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:from-purple-700 hover:to-purple-900 transition-all font-semibold"
-                  >
-                    Next →
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="card text-center py-20 bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-dashed border-slate-700">
-              <div className="text-8xl mb-6">📭</div>
-              <h3 className="text-3xl font-bold text-white mb-3">No Activities Found</h3>
-              <p className="text-slate-400 text-lg mb-4">
-                {activities.length === 0
-                  ? 'Start creating drafts and searching to see your activity history here'
-                  : 'Try adjusting your filters to see more activities'}
-              </p>
-              {(searchTerm || filterAction !== 'all' || filterType !== 'all' || dateRange !== 'all') && (
-                <button
-                  onClick={() => {
-                    setFilterAction('all');
-                    setFilterType('all');
-                    setSearchTerm('');
-                    setDateRange('all');
-                    setPage(1);
-                  }}
-                  className="mt-4 px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-all"
-                >
-                  Clear Filters
-                </button>
-              )}
+                );
+              })}
             </div>
-          )}
-        </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div style={{
+                display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8,
+                marginTop: 32, paddingTop: 24, borderTop: '1px solid rgba(148,163,184,0.1)'
+              }}>
+                <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}
+                  style={{
+                    padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 600,
+                    background: 'rgba(30,41,59,0.6)', border: '1px solid rgba(148,163,184,0.15)',
+                    color: '#cbd5e1', cursor: page === 1 ? 'not-allowed' : 'pointer', opacity: page === 1 ? 0.3 : 1,
+                  }}>← Prev</button>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const pageNum = Math.max(1, page - 2) + i;
+                  if (pageNum > totalPages) return null;
+                  return (
+                    <button key={pageNum} onClick={() => setPage(pageNum)} style={{
+                      width: 36, height: 36, borderRadius: 10, fontSize: 13, fontWeight: 700,
+                      border: 'none', cursor: 'pointer', transition: 'all 0.2s',
+                      background: pageNum === page ? '#a855f7' : 'rgba(30,41,59,0.4)',
+                      color: pageNum === page ? '#fff' : '#94a3b8',
+                      boxShadow: pageNum === page ? '0 4px 12px rgba(168,85,247,0.3)' : 'none',
+                    }}>{pageNum}</button>
+                  );
+                })}
+                <span style={{ color: '#475569', fontSize: 12, padding: '0 6px' }}>of {totalPages}</span>
+                <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages}
+                  className="btn-primary" style={{
+                    padding: '8px 16px', borderRadius: 10, fontSize: 13,
+                    opacity: page === totalPages ? 0.3 : 1, cursor: page === totalPages ? 'not-allowed' : 'pointer',
+                  }}>Next →</button>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="card" style={{ textAlign: 'center', padding: '60px 24px', background: 'rgba(15,23,42,0.7)' }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>📭</div>
+            <h3 style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 8 }}>No Activities Found</h3>
+            <p style={{ color: '#94a3b8', fontSize: 14, marginBottom: 20, maxWidth: 400, margin: '0 auto 20px' }}>
+              {activities.length === 0 ? 'Start creating drafts and using research tools to build your activity log.' : 'Try adjusting your filters to view more results.'}
+            </p>
+            {(searchTerm || filterAction !== 'all' || filterType !== 'all' || dateRange !== 'all') && (
+              <button onClick={() => { setFilterAction('all'); setFilterType('all'); setSearchTerm(''); setDateRange('all'); setPage(1); }}
+                className="btn-primary" style={{ padding: '12px 28px', borderRadius: 12, fontSize: 14 }}>
+                Clear Filters
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </Layout>
   );

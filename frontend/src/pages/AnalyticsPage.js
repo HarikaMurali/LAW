@@ -98,15 +98,14 @@ const AnalyticsPage = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="animate-fade-in-up">
-          <div className="text-center py-24">
-            <div className="inline-flex items-center justify-center gap-3 mb-6">
-              <div className="text-6xl animate-bounce" style={{animationDelay: '0s'}}>📊</div>
-              <div className="text-6xl animate-bounce" style={{animationDelay: '0.2s'}}>📈</div>
-              <div className="text-6xl animate-bounce" style={{animationDelay: '0.4s'}}>📉</div>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 20px' }}>
+          <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+            <div style={{ display: 'inline-flex', gap: 8, marginBottom: 16 }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#a855f7', animation: 'pulse 1.2s ease-in-out infinite' }} />
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#3b82f6', animation: 'pulse 1.2s ease-in-out infinite 0.2s' }} />
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#06b6d4', animation: 'pulse 1.2s ease-in-out infinite 0.4s' }} />
             </div>
-            <p className="text-slate-300 text-xl font-semibold">Loading your analytics...</p>
-            <p className="text-slate-500 text-sm mt-2">This won't take long</p>
+            <p style={{ color: '#94a3b8', fontSize: 14, fontWeight: 600 }}>Loading analytics…</p>
           </div>
         </div>
       </Layout>
@@ -116,15 +115,12 @@ const AnalyticsPage = () => {
   if (!analytics) {
     return (
       <Layout>
-        <div className="animate-fade-in-up">
-          <div className="text-center py-20">
-            <div className="inline-block p-8 rounded-full bg-gradient-to-br from-purple-500/20 to-cyan-500/20 mb-6">
-              <div className="text-8xl animate-bounce">📊</div>
-            </div>
-            <h2 className="text-4xl font-bold text-white mb-3">No Analytics Data Yet</h2>
-            <p className="text-slate-400 text-lg mb-3">Start creating drafts to see your analytics dashboard</p>
-            <p className="text-slate-500 text-sm max-w-md mx-auto">
-              📝 Create drafts • 🔍 Research cases • 📚 Use features to generate activity data
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 20px' }}>
+          <div className="card" style={{ textAlign: 'center', padding: '60px 24px', background: 'rgba(15,23,42,0.7)' }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>📊</div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 8 }}>No Analytics Data Yet</h2>
+            <p style={{ color: '#94a3b8', fontSize: 14, maxWidth: 400, margin: '0 auto' }}>
+              Start creating drafts and using research tools to populate your analytics dashboard.
             </p>
           </div>
         </div>
@@ -132,356 +128,245 @@ const AnalyticsPage = () => {
     );
   }
 
+  const COLORS = ['#a855f7', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899'];
+
+  const statCards = [
+    { label: 'Total Drafts', value: formatNumber(analytics.totalDrafts), icon: '📄', color: '#a855f7' },
+    { label: 'Research Count', value: formatNumber(analytics.researchCount), icon: '🔬', color: '#3b82f6' },
+    { label: 'Total Activities', value: formatNumber(analytics.totalActivities), icon: '📈', color: '#10b981' },
+    { label: 'Avg Daily Activity', value: analytics.avgDailyActivity || '0', icon: '⚡', color: '#f59e0b' },
+  ];
+
   return (
     <Layout>
-      <div className="animate-fade-in-up">
-        {/* Header */}
-        <div className="mb-12 text-center">
-          <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 mb-4 flex items-center justify-center gap-3">
-            📊 Analytics Dashboard
-          </h1>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Track your drafting productivity, trends, and activity patterns in real-time
-          </p>
+      <div className="animate-fade-in-up" style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 20px' }}>
+
+        {/* ── Header ── */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 6 }}>
+              <div style={{
+                width: 46, height: 46, borderRadius: 12,
+                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
+                boxShadow: '0 4px 15px rgba(59,130,246,0.35)'
+              }}>📊</div>
+              <h1 style={{ fontSize: 28, fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>Analytics</h1>
+            </div>
+            <p style={{ color: '#94a3b8', fontSize: 14, marginLeft: 60 }}>Overview of your drafting productivity and usage patterns</p>
+          </div>
+          <button onClick={() => { setLoading(true); fetchAnalytics(); }} className="btn-primary"
+            style={{ padding: '10px 22px', borderRadius: 12, fontSize: 13 }}>🔄 Refresh</button>
         </div>
 
-        {/* Key Metrics Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <div className="card bg-gradient-to-br from-purple-600/90 to-purple-800/90 border-l-4 border-purple-400 hover:shadow-2xl hover:shadow-purple-500/50 hover:-translate-y-1 transition-all duration-300 group">
-            <div className="flex items-start justify-between mb-4">
-              <span className="text-5xl group-hover:scale-110 transition-transform">📄</span>
-              <span className="text-xs text-purple-200 font-bold uppercase tracking-wider">Total</span>
+        {/* ── Stat Cards ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
+          {statCards.map((s, i) => (
+            <div key={i} className="card" style={{
+              padding: '22px 24px', textAlign: 'center',
+              borderTop: `3px solid ${s.color}`,
+              background: 'rgba(15,23,42,0.7)',
+            }}>
+              <span style={{ fontSize: 28, display: 'block', marginBottom: 8 }}>{s.icon}</span>
+              <p style={{ color: '#94a3b8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 8 }}>{s.label}</p>
+              <p style={{ fontSize: 32, fontWeight: 900, color: '#fff' }}>{s.value}</p>
             </div>
-            <p className="text-6xl font-black text-white">{formatNumber(analytics.totalDrafts)}</p>
-            <p className="text-purple-200 text-sm mt-4 font-semibold">Total Drafts Created</p>
-            <div className="mt-4 h-2 bg-purple-400/30 rounded-full overflow-hidden">
-              <div className="h-full w-4/5 bg-gradient-to-r from-purple-300 to-purple-100 rounded-full"></div>
+          ))}
+        </div>
+
+        {/* ── Charts Row ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+
+          {/* Bar Chart — Monthly Drafts */}
+          <div className="card" style={{ padding: 0, overflow: 'hidden', background: 'rgba(15,23,42,0.7)', border: '1px solid rgba(148,163,184,0.15)' }}>
+            <div style={{
+              padding: '16px 22px', borderBottom: '1px solid rgba(148,163,184,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'rgba(168,85,247,0.04)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 18 }}>📊</span>
+                <span style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>Monthly Drafts</span>
+              </div>
+              <span style={{ fontSize: 11, color: '#64748b', background: 'rgba(100,116,139,0.15)', padding: '3px 10px', borderRadius: 20 }}>Last 6 months</span>
+            </div>
+            <div style={{ padding: '20px 16px 16px' }}>
+              {analytics.monthlyDrafts?.length > 0 ? (
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart data={analytics.monthlyDrafts} barCategoryGap="20%">
+                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                    <XAxis dataKey="month" stroke="#64748b" style={{ fontSize: '11px', fontWeight: '600' }} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#64748b" style={{ fontSize: '11px' }} tickLine={false} axisLine={false} width={30} />
+                    <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px', color: '#fff', fontSize: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.4)' }} cursor={{ fill: 'rgba(148, 163, 184, 0.06)' }} />
+                    <Bar dataKey="count" fill="#a855f7" radius={[6, 6, 0, 0]} name="Drafts" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div style={{ height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: 14 }}>No data yet</div>
+              )}
             </div>
           </div>
 
-          <div className="card bg-gradient-to-br from-blue-600/90 to-blue-800/90 border-l-4 border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 hover:-translate-y-1 transition-all duration-300 group">
-            <div className="flex items-start justify-between mb-4">
-              <span className="text-5xl group-hover:scale-110 transition-transform">📈</span>
-              <span className="text-xs text-blue-200 font-bold uppercase tracking-wider">Weekly</span>
+          {/* Pie Chart — Case Types */}
+          <div className="card" style={{ padding: 0, overflow: 'hidden', background: 'rgba(15,23,42,0.7)', border: '1px solid rgba(148,163,184,0.15)' }}>
+            <div style={{
+              padding: '16px 22px', borderBottom: '1px solid rgba(148,163,184,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'rgba(59,130,246,0.04)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 18 }}>📋</span>
+                <span style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>Case Types</span>
+              </div>
+              <span style={{ fontSize: 11, color: '#64748b', background: 'rgba(100,116,139,0.15)', padding: '3px 10px', borderRadius: 20 }}>{analytics.draftsByType?.length || 0} types</span>
             </div>
-            <p className="text-6xl font-black text-white">
-              {analytics.totalDrafts && analytics.dailyActivity
-                ? (analytics.totalDrafts / Math.ceil(analytics.dailyActivity.length / 7)).toFixed(1)
-                : '0'}
-            </p>
-            <p className="text-blue-200 text-sm mt-4 font-semibold">Drafts Per Week</p>
-            <div className="mt-4 h-2 bg-blue-400/30 rounded-full overflow-hidden">
-              <div className="h-full w-2/3 bg-gradient-to-r from-blue-300 to-blue-100 rounded-full"></div>
-            </div>
-          </div>
-
-          <div className="card bg-gradient-to-br from-amber-600/90 to-amber-800/90 border-l-4 border-amber-400 hover:shadow-2xl hover:shadow-amber-500/50 hover:-translate-y-1 transition-all duration-300 group">
-            <div className="flex items-start justify-between mb-4">
-              <span className="text-5xl group-hover:scale-110 transition-transform">🎯</span>
-              <span className="text-xs text-amber-200 font-bold uppercase tracking-wider">Peak</span>
-            </div>
-            <p className="text-5xl font-black text-white">
-              {analytics.mostActiveDay?.date
-                ? new Date(analytics.mostActiveDay.date).toLocaleDateString('en-IN', { weekday: 'short' })
-                : '—'}
-            </p>
-            <p className="text-amber-200 text-sm mt-4 font-semibold">Most Active Day</p>
-            <div className="mt-4 h-2 bg-amber-400/30 rounded-full overflow-hidden">
-              <div className="h-full w-5/6 bg-gradient-to-r from-amber-300 to-amber-100 rounded-full"></div>
-            </div>
-          </div>
-
-          <div className="card bg-gradient-to-br from-cyan-600/90 to-cyan-800/90 border-l-4 border-cyan-400 hover:shadow-2xl hover:shadow-cyan-500/50 hover:-translate-y-1 transition-all duration-300 group">
-            <div className="flex items-start justify-between mb-4">
-              <span className="text-5xl group-hover:scale-110 transition-transform">⏱️</span>
-              <span className="text-xs text-cyan-200 font-bold uppercase tracking-wider">Avg</span>
-            </div>
-            <p className="text-6xl font-black text-white">
-              {analytics.avgDailyActivity || '0'}
-            </p>
-            <p className="text-cyan-200 text-sm mt-4 font-semibold">Activities Per Day</p>
-            <div className="mt-4 h-2 bg-cyan-400/30 rounded-full overflow-hidden">
-              <div className="h-full w-3/4 bg-gradient-to-r from-cyan-300 to-cyan-100 rounded-full"></div>
+            <div style={{ padding: '20px 16px 16px' }}>
+              {analytics.draftsByType?.length > 0 ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+                  <ResponsiveContainer width="55%" height={220}>
+                    <PieChart>
+                      <Pie data={analytics.draftsByType} dataKey="count" nameKey="type" cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} strokeWidth={0}>
+                        {analytics.draftsByType.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px', color: '#fff', fontSize: '12px' }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {analytics.draftsByType.map((item, idx) => (
+                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: COLORS[idx % COLORS.length], flexShrink: 0 }} />
+                        <span style={{ fontSize: 13, color: '#cbd5e1', flex: 1 }}>{item.type}</span>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: '#fff' }}>{item.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: 14 }}>No data yet</div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-          {/* Drafts Per Month - Bar Chart */}
-          <div className="card bg-gradient-to-br from-slate-800 to-slate-900 border border-purple-500/30 hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 overflow-hidden">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                <span className="text-3xl">📊</span>
-                Drafts Per Month
-              </h2>
-              <span className="text-xs bg-purple-500/30 text-purple-200 px-3 py-1 rounded-full font-semibold">Last 6 Months</span>
+        {/* ── Line Chart — Activity Trend ── */}
+        <div className="card" style={{ padding: 0, overflow: 'hidden', marginBottom: 16, background: 'rgba(15,23,42,0.7)', border: '1px solid rgba(148,163,184,0.15)' }}>
+          <div style={{
+            padding: '16px 22px', borderBottom: '1px solid rgba(148,163,184,0.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            background: 'rgba(16,185,129,0.04)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 18 }}>📈</span>
+              <span style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>Activity Trend</span>
             </div>
-            {analytics.monthlyDrafts && analytics.monthlyDrafts.length > 0 ? (
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={analytics.monthlyDrafts}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                  <XAxis 
-                    dataKey="month" 
-                    stroke="#94a3b8"
-                    style={{ fontSize: '13px', fontWeight: '600' }}
-                  />
-                  <YAxis stroke="#94a3b8" style={{ fontSize: '13px' }} />
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: '#1e293b',
-                      border: '2px solid #a78bfa',
-                      borderRadius: '10px',
-                      color: '#fff',
-                      boxShadow: '0 10px 30px rgba(168, 85, 247, 0.3)'
-                    }}
-                    cursor={{ fill: 'rgba(168, 85, 247, 0.1)' }}
-                  />
-                  <Bar
-                    dataKey="count"
-                    fill="#a855f7"
-                    radius={[8, 8, 0, 0]}
-                    name="Drafts"
-                  />
-                </BarChart>
+            <span style={{ fontSize: 11, color: '#64748b', background: 'rgba(100,116,139,0.15)', padding: '3px 10px', borderRadius: 20 }}>Last 7 days</span>
+          </div>
+          <div style={{ padding: '20px 16px 16px' }}>
+            {analytics.dailyActivity?.length > 0 ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <LineChart data={analytics.dailyActivity}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                  <XAxis dataKey="date" stroke="#64748b" style={{ fontSize: '11px', fontWeight: '600' }} tickLine={false} axisLine={false}
+                    tickFormatter={(d) => new Date(d).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })} />
+                  <YAxis stroke="#64748b" style={{ fontSize: '11px' }} tickLine={false} axisLine={false} width={30} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px', color: '#fff', fontSize: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.4)' }}
+                    labelFormatter={(d) => new Date(d).toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' })}
+                    cursor={{ stroke: '#475569', strokeDasharray: '4 4' }} />
+                  <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2.5} dot={{ fill: '#3b82f6', r: 4, strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 0 }} name="Activities" />
+                </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-80 flex items-center justify-center text-slate-400">
-                <p>No monthly data available yet</p>
-              </div>
-            )}
-          </div>
-
-          {/* Case Type Distribution - Pie Chart */}
-          <div className="card bg-gradient-to-br from-slate-800 to-slate-900 border border-cyan-500/30 hover:shadow-xl hover:shadow-cyan-500/20 transition-all duration-300 overflow-hidden">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                <span className="text-3xl">📋</span>
-                Case Type Distribution
-              </h2>
-              <span className="text-xs bg-cyan-500/30 text-cyan-200 px-3 py-1 rounded-full font-semibold">{analytics.draftsByType?.length || 0} Types</span>
-            </div>
-            {analytics.draftsByType && analytics.draftsByType.length > 0 ? (
-              <div className="flex flex-col items-center">
-                <ResponsiveContainer width="100%" height={320}>
-                  <PieChart>
-                    <Pie
-                      data={analytics.draftsByType}
-                      dataKey="count"
-                      nameKey="type"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={80}
-                      outerRadius={120}
-                      paddingAngle={2}
-                      startAngle={90}
-                      endAngle={450}
-                    >
-                      {analytics.draftsByType.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={[
-                            '#a855f7',
-                            '#06b6d4',
-                            '#10b981',
-                            '#f59e0b',
-                            '#ef4444',
-                            '#ec4899'
-                          ][index % 6]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: '#1e293b',
-                        border: '2px solid #06b6d4',
-                        borderRadius: '10px',
-                        color: '#fff',
-                        boxShadow: '0 10px 30px rgba(6, 182, 212, 0.3)'
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="mt-6 grid grid-cols-2 gap-3 w-full">
-                  {analytics.draftsByType.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-2 p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-all">
-                      <div
-                        className="w-3 h-3 rounded-full flex-shrink-0"
-                        style={{
-                          backgroundColor: [
-                            '#a855f7',
-                            '#06b6d4',
-                            '#10b981',
-                            '#f59e0b',
-                            '#ef4444',
-                            '#ec4899'
-                          ][idx % 6]
-                        }}
-                      />
-                      <span className="text-sm text-slate-300 font-semibold flex-1">{item.type}</span>
-                      <span className="text-sm font-bold text-white">{item.count}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="h-80 flex items-center justify-center text-slate-400">
-                <p>No case type data available yet</p>
-              </div>
+              <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: 14 }}>No data yet</div>
             )}
           </div>
         </div>
 
-        {/* Weekly Activity Trend - Line Chart */}
-        <div className="card bg-gradient-to-br from-slate-800 to-slate-900 border border-blue-500/30 hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-300 mb-10 overflow-hidden">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-              <span className="text-3xl">📅</span>
-              Weekly Activity Trend
-            </h2>
-            <span className="text-xs bg-blue-500/30 text-blue-200 px-3 py-1 rounded-full font-semibold">Last 7+ Days</span>
-          </div>
-          {analytics.dailyActivity && analytics.dailyActivity.length > 0 ? (
-            <ResponsiveContainer width="100%" height={370}>
-              <LineChart data={analytics.dailyActivity}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis
-                  dataKey="date"
-                  stroke="#94a3b8"
-                  style={{ fontSize: '13px', fontWeight: '600' }}
-                  tickFormatter={(date) =>
-                    new Date(date).toLocaleDateString('en-IN', {
-                      month: 'short',
-                      day: 'numeric'
-                    })
-                  }
-                />
-                <YAxis stroke="#94a3b8" style={{ fontSize: '13px' }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#1e293b',
-                    border: '2px solid #3b82f6',
-                    borderRadius: '10px',
-                    color: '#fff',
-                    boxShadow: '0 10px 30px rgba(59, 130, 246, 0.3)'
-                  }}
-                  labelFormatter={(date) =>
-                    new Date(date).toLocaleDateString('en-IN', {
-                      weekday: 'short',
-                      month: 'short',
-                      day: 'numeric'
-                    })
-                  }
-                  cursor={{ stroke: '#3b82f6', strokeDasharray: '5 5' }}
-                />
-                <Legend
-                  wrapperStyle={{ paddingTop: '20px' }}
-                  contentStyle={{
-                    backgroundColor: '#1e293b',
-                    border: '1px solid #334155',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)'
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="count"
-                  stroke="#3b82f6"
-                  strokeWidth={3}
-                  dot={{ fill: '#60a5fa', r: 6 }}
-                  activeDot={{ r: 8 }}
-                  name="Daily Activities"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-80 flex items-center justify-center text-slate-400">
-              <p>No daily activity data available yet</p>
-            </div>
-          )}
-        </div>
+        {/* ── Bottom Row ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16 }}>
 
-        {/* Activity by Action - Enhanced */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-          <div className="card bg-gradient-to-br from-slate-800 to-slate-900 border border-green-500/30 hover:shadow-xl hover:shadow-green-500/20 transition-all duration-300 overflow-hidden">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                <span className="text-3xl">🎯</span>
-                Activity by Action Type
-              </h2>
-              <span className="text-xs bg-green-500/30 text-green-200 px-3 py-1 rounded-full font-semibold">{analytics.activityByAction?.length || 0} Actions</span>
+          {/* Activity Breakdown */}
+          <div className="card" style={{ padding: 0, overflow: 'hidden', background: 'rgba(15,23,42,0.7)', border: '1px solid rgba(148,163,184,0.15)' }}>
+            <div style={{
+              padding: '16px 22px', borderBottom: '1px solid rgba(148,163,184,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'rgba(245,158,11,0.04)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 18 }}>🎯</span>
+                <span style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>Activity Breakdown</span>
+              </div>
+              <span style={{ fontSize: 11, color: '#64748b', background: 'rgba(100,116,139,0.15)', padding: '3px 10px', borderRadius: 20 }}>{analytics.activityByAction?.length || 0} types</span>
             </div>
-            {analytics.activityByAction && analytics.activityByAction.length > 0 ? (
-              <div className="space-y-3 max-h-96 overflow-y-auto activity-scroll pr-2">
-                {analytics.activityByAction.map((item, idx) => {
-                  const maxCount = Math.max(
-                    ...analytics.activityByAction.map(a => a.count),
-                    1
-                  );
-                  const widthPercent = (item.count / maxCount) * 100;
-                  return (
-                    <div key={idx} className="group">
-                      <div className="flex justify-between mb-2">
-                        <span className="text-slate-300 text-sm font-semibold">
-                          {item.action}
-                        </span>
-                        <span className="px-3 py-1 bg-green-600 text-white rounded-full text-xs font-bold">
-                          {item.count}
-                        </span>
+            <div style={{ padding: '22px 24px' }}>
+              {analytics.activityByAction?.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {analytics.activityByAction.map((item, idx) => {
+                    const maxCount = Math.max(...analytics.activityByAction.map(a => a.count), 1);
+                    const pct = (item.count / maxCount) * 100;
+                    return (
+                      <div key={idx}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                          <span style={{ fontSize: 13, color: '#cbd5e1', fontWeight: 600 }}>{item.action}</span>
+                          <span style={{ fontSize: 13, fontWeight: 800, color: '#fff' }}>{item.count}</span>
+                        </div>
+                        <div style={{ width: '100%', height: 8, background: 'rgba(100,116,139,0.15)', borderRadius: 20, overflow: 'hidden' }}>
+                          <div style={{ width: `${pct}%`, height: '100%', borderRadius: 20, background: COLORS[idx % COLORS.length], transition: 'width 0.6s ease' }} />
+                        </div>
                       </div>
-                      <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
-                        <div
-                          className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full transition-all group-hover:from-green-400 group-hover:to-green-500"
-                          style={{ width: `${widthPercent}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-slate-400">No activity data available yet</p>
-            )}
+                    );
+                  })}
+                </div>
+              ) : (
+                <p style={{ color: '#64748b', fontSize: 14 }}>No data yet</p>
+              )}
+            </div>
           </div>
 
-          {/* Summary Stats */}
-          <div className="space-y-4">
-            <div className="card bg-gradient-to-br from-slate-800 to-slate-900 border border-amber-500/30 hover:shadow-xl hover:shadow-amber-500/20 transition-all duration-300 h-full">
-              <div className="flex items-start gap-4 h-full flex-col justify-between">
-                <div>
-                  <div className="text-5xl mb-4">📈</div>
-                  <p className="text-slate-400 text-sm mb-3 font-semibold">Total Activities</p>
-                  <p className="text-6xl font-black text-white">{formatNumber(analytics.totalActivities)}</p>
-                </div>
-                <p className="text-slate-500 text-xs font-semibold">All recorded actions in system</p>
+          {/* Summary Side Cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className="card" style={{
+              padding: '24px', background: 'rgba(15,23,42,0.7)',
+              borderTop: '3px solid #f59e0b',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                <span style={{ fontSize: 20 }}>📈</span>
+                <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5, color: '#f59e0b' }}>Total</span>
               </div>
+              <p style={{ fontSize: 36, fontWeight: 900, color: '#fff', marginBottom: 4 }}>{formatNumber(analytics.totalActivities)}</p>
+              <p style={{ color: '#64748b', fontSize: 12 }}>All recorded activities</p>
             </div>
 
-            <div className="card bg-gradient-to-br from-slate-800 to-slate-900 border border-pink-500/30 hover:shadow-xl hover:shadow-pink-500/20 transition-all duration-300 h-full">
-              <div className="flex items-start gap-4 h-full flex-col justify-between">
-                <div>
-                  <div className="text-5xl mb-4">🔥</div>
-                  <p className="text-slate-400 text-sm mb-3 font-semibold">Research Queries</p>
-                  <p className="text-6xl font-black text-white">{formatNumber(analytics.researchCount)}</p>
-                </div>
-                <p className="text-slate-500 text-xs font-semibold">Case law & statute searches</p>
+            <div className="card" style={{
+              padding: '24px', background: 'rgba(15,23,42,0.7)',
+              borderTop: '3px solid #ec4899',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                <span style={{ fontSize: 20 }}>🔬</span>
+                <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5, color: '#ec4899' }}>Research</span>
               </div>
+              <p style={{ fontSize: 36, fontWeight: 900, color: '#fff', marginBottom: 4 }}>{formatNumber(analytics.researchCount)}</p>
+              <p style={{ color: '#64748b', fontSize: 12 }}>Case law & statute searches</p>
+            </div>
+
+            <div className="card" style={{
+              padding: '24px', background: 'rgba(15,23,42,0.7)',
+              borderTop: '3px solid #10b981',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                <span style={{ fontSize: 20 }}>🎯</span>
+                <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.5, color: '#10b981' }}>Most Active</span>
+              </div>
+              <p style={{ fontSize: 26, fontWeight: 900, color: '#fff', marginBottom: 4 }}>
+                {analytics.mostActiveDay?.date ? new Date(analytics.mostActiveDay.date).toLocaleDateString('en-IN', { weekday: 'long' }) : '—'}
+              </p>
+              <p style={{ color: '#64748b', fontSize: 12 }}>{analytics.mostActiveDay?.count || 0} activities that day</p>
             </div>
           </div>
         </div>
 
-        {/* Refresh Button */}
-        <div className="text-center mb-12">
-          <button
-            onClick={() => {
-              setLoading(true);
-              fetchAnalytics();
-            }}
-            className="px-8 py-4 bg-gradient-to-r from-purple-600 via-cyan-600 to-purple-600 text-white rounded-lg hover:from-purple-700 hover:via-cyan-700 hover:to-purple-700 transition-all font-bold shadow-lg hover:shadow-2xl hover:shadow-cyan-500/50 transform hover:-translate-y-1 duration-300 text-lg"
-          >
-            🔄 Refresh Analytics
-          </button>
-        </div>
       </div>
     </Layout>
   );

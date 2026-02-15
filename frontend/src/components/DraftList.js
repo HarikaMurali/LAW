@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDate } from '../utils/dateFormat';
 import '../App.css';
 
 const DraftList = ({ drafts, onSelectDraft }) => {
@@ -24,7 +25,7 @@ const DraftList = ({ drafts, onSelectDraft }) => {
               {draft.title || 'Untitled Draft'}
             </h3>
             <p className="text-xs text-slate-400 mt-1">
-              {new Date(draft.createdAt).toLocaleDateString()}
+              {formatDate(draft.createdAt, { short: true })}
             </p>
           </div>
         ))
