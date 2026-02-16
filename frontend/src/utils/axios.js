@@ -1,14 +1,14 @@
 import axios from 'axios';
 
-const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+const instance = axios.create({
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
   headers: {
     'Content-Type': 'application/json'
   }
 });
 
-// Attach JWT token to every request automatically
-api.interceptors.request.use(
+// Add a request interceptor to include the token
+instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -20,7 +20,7 @@ api.interceptors.request.use(
 );
 
 // Add a response interceptor for error handling
-api.interceptors.response.use(
+instance.interceptors.response.use(
   response => response,
   error => {
     console.error('API Error:', error);
@@ -28,4 +28,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api;
+export default instance;

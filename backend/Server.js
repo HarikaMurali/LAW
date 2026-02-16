@@ -6,10 +6,16 @@ const { generateContent } = require('./utils/gemini');
 
 const app = express();
 
+// Configure CORS to allow both local development and production requests
+const allowedOrigins = [
+  'http://localhost:3000', // Local development
+  process.env.FRONTEND_URL // Production frontend URL
+].filter(Boolean);
+
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: allowedOrigins,
   credentials: true
 }));
 
