@@ -17,90 +17,6 @@ const HistoryPage = () => {
   const [endDate, setEndDate] = useState('');
   const [activeTab, setActiveTab] = useState('search'); // 'search', 'filters', 'date'
 
-  // Mock data for demonstration
-  const mockActivities = [
-    {
-      _id: '1',
-      user: { name: 'John Doe', email: 'john@example.com' },
-      action: 'Generated Draft',
-      draftName: 'Employment Contract - TechCorp',
-      caseType: 'Contract',
-      status: 'success',
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      details: 'Created new employment contract'
-    },
-    {
-      _id: '2',
-      user: { name: 'Jane Smith', email: 'jane@example.com' },
-      action: 'Edited Draft',
-      draftName: 'Settlement Agreement',
-      caseType: 'Civil',
-      status: 'success',
-      timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
-      details: 'Updated clause terms'
-    },
-    {
-      _id: '3',
-      user: { name: 'John Doe', email: 'john@example.com' },
-      action: 'Case Law Search',
-      draftName: '',
-      caseType: 'Criminal',
-      status: 'success',
-      timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
-      details: 'Searched for precedent cases'
-    },
-    {
-      _id: '4',
-      user: { name: 'Sarah Wilson', email: 'sarah@example.com' },
-      action: 'Downloaded Draft',
-      draftName: 'Divorce Decree - Final',
-      caseType: 'Family',
-      status: 'success',
-      timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000),
-      details: 'Downloaded as PDF'
-    },
-    {
-      _id: '5',
-      user: { name: 'Mike Johnson', email: 'mike@example.com' },
-      action: 'Proofreading',
-      draftName: 'Contract Amendment',
-      caseType: 'Contract',
-      status: 'success',
-      timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-      details: 'Proofed document, no changes'
-    },
-    {
-      _id: '6',
-      user: { name: 'Jane Smith', email: 'jane@example.com' },
-      action: 'Statute Search',
-      draftName: '',
-      caseType: 'Civil',
-      status: 'success',
-      timestamp: new Date(Date.now() - 1.5 * 24 * 60 * 60 * 1000),
-      details: 'Searched state statutes'
-    },
-    {
-      _id: '7',
-      user: { name: 'John Doe', email: 'john@example.com' },
-      action: 'Clause Suggestion',
-      draftName: 'Non-Disclosure Agreement',
-      caseType: 'Contract',
-      status: 'success',
-      timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-      details: 'Added arbitration clause'
-    },
-    {
-      _id: '8',
-      user: { name: 'Sarah Wilson', email: 'sarah@example.com' },
-      action: 'Deleted Draft',
-      draftName: 'Old Draft - Archived',
-      caseType: 'Criminal',
-      status: 'success',
-      timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-      details: 'Deleted outdated document'
-    }
-  ];
-
   useEffect(() => {
     fetchHistory();
   }, [filterAction, filterType, searchTerm, page]);
@@ -120,21 +36,15 @@ const HistoryPage = () => {
 
       if (response.data.success) {
         setActivities(response.data.activities);
-        setTotalPages(response.data.pagination.pages);
+        setTotalPages(response.data.pagination?.pages || 1);
       } else {
-        // Use mock data if no success
-        setTimeout(() => {
-          setActivities(mockActivities);
-          setTotalPages(1);
-        }, 1200);
+        setActivities([]);
+        setTotalPages(1);
       }
     } catch (error) {
       console.error('Failed to fetch history:', error);
-      // Use mock data on error
-      setTimeout(() => {
-        setActivities(mockActivities);
-        setTotalPages(1);
-      }, 1200);
+      setActivities([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }

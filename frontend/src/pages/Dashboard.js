@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../utils/axios';
 import DraftForm from '../components/DraftForm';
 import DraftList from '../components/DraftList';
 import DraftEditor from '../components/DraftEditor';

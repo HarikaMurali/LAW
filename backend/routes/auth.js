@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Activity = require('../models/Activity');
 
 router.post('/register', async (req, res) => {
     try {
@@ -18,6 +19,7 @@ router.post('/register', async (req, res) => {
         const passwordHash = await bcrypt.hash(password, salt);
         const newUser = new User({ name, email, passwordHash });
         await newUser.save();
+        try { await Activity.create({ userId: newUser._id, action: 'Registered', title: 'Account created', type: 'General', details: `User ${name} registered` }); } catch (_) {}
         res.status(201).json({ msg: 'User registered successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -39,6 +41,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ msg: 'Invalid credentials' });
         }
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        try { await Activity.create({ userId: user._id, action: 'Login', title: 'User logged in', type: 'General', details: `Login from ${email}` }); } catch (_) {}
         res.json({
             token,
             user: {

@@ -8,7 +8,7 @@ router.get('/history', auth, async (req, res) => {
   try {
     const { action, type, search, page = 1, limit = 50 } = req.query;
     
-    const query = { userId: req.userId };
+    const query = { userId: req.user.userId };
     
     // Apply filters
     if (action && action !== 'all') {
@@ -53,7 +53,7 @@ router.get('/history', auth, async (req, res) => {
 // Get activity statistics
 router.get('/stats', auth, async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = req.user.userId;
     
     // Get today's activities
     const today = new Date();
@@ -102,7 +102,7 @@ router.post('/log', auth, async (req, res) => {
     const { action, title, type, details, draftId, metadata } = req.body;
     
     const activity = new Activity({
-      userId: req.userId,
+      userId: req.user.userId,
       action,
       title,
       type,

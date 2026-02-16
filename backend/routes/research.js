@@ -2,13 +2,11 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const Activity = require('../models/Activity');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY);
+const auth = require('../middleware/auth');
+const { generateContent } = require('../utils/gemini');
 
 // Search Indian Case Law using Gemini AI
-router.post('/cases', async (req, res) => {
+router.post('/cases', auth, async (req, res) => {
   try {
     const { query } = req.body;
     
@@ -19,8 +17,6 @@ router.post('/cases', async (req, res) => {
     console.log(`Searching Indian case law for: ${query}`);
 
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      
       const prompt = `You are an Indian legal research expert. Search for and provide 5-8 relevant Indian court cases related to: "${query}"
 
 For each case provide in this EXACT format (one case per block):
@@ -35,9 +31,7 @@ Relevance: [Area of law]
 
 Provide real, accurate Indian cases only. If searching for keywords, find the most landmark/important cases.`;
 
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const aiResponse = response.text();
+      const aiResponse = await generateContent(prompt);
 
       // Parse AI response into structured format
       const cases = [];
@@ -68,12 +62,13 @@ Provide real, accurate Indian cases only. If searching for keywords, find the mo
       console.log(`✅ Found ${cases.length} cases using Gemini AI`);
 
       // Log activity
-      if (req.userId) {
+      if (req.user?.userId) {
         try {
           await Activity.create({
-            userId: req.userId,
+            userId: req.user.userId,
             action: 'Case Law Search',
             title: `Searched: ${query}`,
+            type: 'General',
             details: `Found ${cases.length} relevant cases`,
             metadata: { searchQuery: query, resultsCount: cases.length }
           });
@@ -109,7 +104,7 @@ Provide real, accurate Indian cases only. If searching for keywords, find the mo
 });
 
 // Search Indian Statutes using Gemini AI
-router.post('/statutes', async (req, res) => {
+router.post('/statutes', auth, async (req, res) => {
   try {
     const { query } = req.body;
     
@@ -120,8 +115,6 @@ router.post('/statutes', async (req, res) => {
     console.log(`Searching for statute: ${query}`);
 
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      
       const prompt = `You are an Indian legal expert. Provide information about Indian laws/acts related to: "${query}"
 
 If it's a specific section (like "IPC 302", "Section 498A"), provide detailed information about that section.
@@ -137,9 +130,7 @@ Keywords: [Comma-separated relevant terms]
 
 Provide real, accurate Indian legislation only.`;
 
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const aiResponse = response.text();
+      const aiResponse = await generateContent(prompt);
 
       // Parse AI response
       const statutes = [];
@@ -166,12 +157,13 @@ Provide real, accurate Indian legislation only.`;
       console.log(`✅ Found ${statutes.length} statute documents using Gemini AI`);
 
       // Log activity
-      if (req.userId) {
+      if (req.user?.userId) {
         try {
           await Activity.create({
-            userId: req.userId,
+            userId: req.user.userId,
             action: 'Statute Search',
             title: `Searched: ${query}`,
+            type: 'General',
             details: `Found ${statutes.length} relevant statutes/sections`,
             metadata: { searchQuery: query, resultsCount: statutes.length }
           });
@@ -207,7 +199,7 @@ Provide real, accurate Indian legislation only.`;
 });
 
 // Legal Dictionary using Gemini AI
-router.post('/dictionary', async (req, res) => {
+router.post('/dictionary', auth, async (req, res) => {
   try {
     const { term } = req.body;
     
@@ -218,8 +210,6 @@ router.post('/dictionary', async (req, res) => {
     console.log(`Looking up legal term: ${term}`);
 
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      
       const prompt = `You are an expert in Indian legal terminology. Provide a comprehensive explanation of the legal term or section: "${term}"
 
 If it's an IPC/CrPC/CPC section (like "IPC 302" or "Section 498A"), provide:
@@ -237,19 +227,18 @@ If it's a legal term (like "Habeas Corpus" or "Prima Facie"), provide:
 
 Be concise but comprehensive. Use bullet points for clarity.`;
 
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const explanation = response.text();
+      const explanation = await generateContent(prompt);
 
       console.log(`✅ Generated explanation for: ${term}`);
 
       // Log activity
-      if (req.userId) {
+      if (req.user?.userId) {
         try {
           await Activity.create({
-            userId: req.userId,
+            userId: req.user.userId,
             action: 'Dictionary Lookup',
             title: `Looked up: ${term}`,
+            type: 'General',
             details: `Searched for definition of legal term/section`,
             metadata: { term }
           });

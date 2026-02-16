@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Activity = require('../models/Activity');
 const Draft = require('../models/Draft');
 const auth = require('../middleware/auth');
@@ -7,7 +8,7 @@ const auth = require('../middleware/auth');
 // Get comprehensive analytics
 router.get('/', auth, async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = new mongoose.Types.ObjectId(req.user.userId);
     
     // Get draft counts by case type
     const draftsByType = await Draft.aggregate([

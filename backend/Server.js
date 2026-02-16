@@ -2,12 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { generateContent } = require('./utils/gemini');
 
 const app = express();
-
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY);
 
 // Middleware
 app.use(express.json());
@@ -23,6 +20,8 @@ const generateRouter = require('./routes/generate');
 const researchRouter = require('./routes/research');
 const activityRouter = require('./routes/activity');
 const analyticsRouter = require('./routes/analytics');
+const Activity = require('./models/Activity');
+const authMiddleware = require('./middleware/auth');
 
 // Use routes with explicit paths
 app.use('/api/auth', authRouter);
@@ -33,7 +32,7 @@ app.use('/api/activity', activityRouter);
 app.use('/api/analytics', analyticsRouter);
 
 // Real AI Proofreading with Gemini
-app.post('/api/proofread', async (req, res) => {
+app.post('/api/proofread', authMiddleware, async (req, res) => {
   try {
     const { text } = req.body;
     if (!text) {
@@ -41,8 +40,6 @@ app.post('/api/proofread', async (req, res) => {
     }
     
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      
       const prompt = `You are a legal proofreading expert. Analyze the following legal draft and provide:
 
 1. Grammar and Spelling Errors (if any)
@@ -55,13 +52,17 @@ Be thorough and professional. Format your response clearly.
 Draft to proofread:
 ${text}`;
 
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const analysis = response.text();
+      const analysis = await generateContent(prompt);
+      
+      // Log proofreading activity
+      try { await Activity.create({ userId: req.user.userId, action: 'Proofreading', title: 'Document proofread', type: 'General', details: 'AI proofreading completed' }); } catch (_) {}
       
       res.json({ result: analysis });
     } catch (aiError) {
       console.error('Gemini proofreading error:', aiError.message);
+      
+      // Log even on fallback
+      try { await Activity.create({ userId: req.user.userId, action: 'Proofreading', title: 'Document proofread', type: 'General', details: 'Proofreading (fallback)' }); } catch (_) {}
       
       // Fallback to mock response
       const mockResult = `Proofreading Analysis:
@@ -87,7 +88,7 @@ Overall: The draft appears well-structured and professionally written.
 });
 
 // Real AI Clause Suggestions with Gemini
-app.post('/api/suggest-clauses', async (req, res) => {
+app.post('/api/suggest-clauses', authMiddleware, async (req, res) => {
   try {
     const { text } = req.body;
     if (!text) {
@@ -95,8 +96,6 @@ app.post('/api/suggest-clauses', async (req, res) => {
     }
     
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      
       const prompt = `You are a legal clause expert. Based on the following legal draft, suggest 5-7 additional important clauses that should be considered for inclusion.
 
 For each suggested clause provide:
@@ -109,13 +108,17 @@ ${text.substring(0, 2000)}
 
 Provide professional, legally sound suggestions.`;
 
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const suggestions = response.text();
+      const suggestions = await generateContent(prompt);
+      
+      // Log clause suggestion activity
+      try { await Activity.create({ userId: req.user.userId, action: 'Clause Suggestion', title: 'Clause suggestions generated', type: 'General', details: 'AI clause suggestion completed' }); } catch (_) {}
       
       res.json({ suggestions });
     } catch (aiError) {
       console.error('Gemini clause suggestion error:', aiError.message);
+      
+      // Log even on fallback
+      try { await Activity.create({ userId: req.user.userId, action: 'Clause Suggestion', title: 'Clause suggestions generated', type: 'General', details: 'Clause suggestion (fallback)' }); } catch (_) {}
       
       // Fallback to mock suggestions
       const mockSuggestions = `Suggested Additional Clauses:

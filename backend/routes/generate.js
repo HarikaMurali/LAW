@@ -3,10 +3,7 @@ const router = express.Router();
 const Draft = require('../models/Draft');
 const Activity = require('../models/Activity');
 const auth = require('../middleware/auth');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY);
+const { generateContent, PRIMARY_MODEL } = require('../utils/gemini');
 
 // Mock draft generator (fallback when API is unavailable)
 const generateMockDraft = (caseType, details, jurisdiction) => {
@@ -79,7 +76,7 @@ Draft Type: ${caseType}`;
 };
 
 // Generate full draft with REAL AI
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     const { caseType, details, jurisdiction } = req.body;
 
@@ -95,8 +92,6 @@ router.post('/', async (req, res) => {
 
     try {
       // Use Gemini AI for real draft generation
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      
       const prompt = `You are an expert legal assistant specializing in ${jurisdiction || 'general'} law. Generate a comprehensive, professional legal draft document for the following case:
 
 Case Type: ${caseType}
@@ -115,17 +110,15 @@ Generate a complete legal draft following this structure:
 
 Use formal legal language, proper legal citation format, and professional structure. The draft should be ready for review by a legal professional. Include appropriate legal terminology and formatting for ${jurisdiction || 'general'} jurisdiction.`;
 
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const draftText = response.text();
+      const draftText = await generateContent(prompt);
 
       console.log('✅ Draft generated successfully with Gemini AI');
 
       // Log activity if user is authenticated
-      if (req.userId) {
+      if (req.user?.userId) {
         try {
           await Activity.create({
-            userId: req.userId,
+            userId: req.user.userId,
             action: 'Generated Draft',
             title: `${caseType} Draft`,
             type: caseType,
@@ -140,7 +133,7 @@ Use formal legal language, proper legal citation format, and professional struct
       res.json({
         draft: draftText,
         metadata: {
-          model: "gemini-2.5-flash",
+          model: PRIMARY_MODEL,
           aiGenerated: true,
           caseType,
           jurisdiction: jurisdiction || 'General',

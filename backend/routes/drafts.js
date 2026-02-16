@@ -1,7 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const Draft = require('../models/Draft');
-const auth = require('../middleware/auth'); // Import the middleware
+const Activity = require('../models/Activity');
+const auth = require('../middleware/auth');
+
+// Helper to log activity silently (never blocks the main response)
+const logActivity = async (userId, action, title, type, details, draftId) => {
+  try {
+    await Activity.create({ userId, action, title, type: type || 'General', details, draftId });
+  } catch (err) {
+    console.error('Activity log error:', err.message);
+  }
+}; // Import the middleware
 
 // @route   GET /api/drafts/debug
 // @desc    Debug endpoint to check all drafts (for testing purposes)
@@ -49,6 +59,7 @@ router.post('/', auth, async (req, res) => {
             draftText
         });
         const draft = await newDraft.save();
+        logActivity(req.user.userId, 'Generated Draft', title, caseType, 'Created new draft', draft._id);
         res.status(201).json(draft);
     } catch (error) {
         res.status(500).json({ msg: 'Server error', error: error.message });
@@ -97,7 +108,10 @@ router.delete('/:id', auth, async (req, res) => {
             return res.status(403).json({ msg: 'Not authorized to delete this draft' });
         }
         
+        const draftTitle = draft.title;
+        const draftType = draft.caseType;
         await Draft.findByIdAndDelete(req.params.id);
+        logActivity(req.user.userId, 'Deleted Draft', draftTitle, draftType, 'Deleted draft', req.params.id);
         res.json({ msg: 'Draft deleted successfully', id: req.params.id });
     } catch (error) {
         res.status(500).json({ msg: 'Server error', error: error.message });
@@ -125,7 +139,7 @@ router.put('/:id', auth, async (req, res) => {
             { title, caseType, details, draftText },
             { new: true }
         );
-        
+        logActivity(req.user.userId, 'Edited Draft', title || draft.title, caseType || draft.caseType, 'Updated draft', req.params.id);
         res.json(updatedDraft);
     } catch (error) {
         res.status(500).json({ msg: 'Server error', error: error.message });

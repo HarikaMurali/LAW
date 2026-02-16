@@ -22,50 +22,6 @@ const AnalyticsPage = () => {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Mock data for demonstration
-  const mockAnalytics = {
-    totalDrafts: 109,
-    researchCount: 87,
-    totalActivities: 234,
-    avgDailyActivity: 12,
-    mostActiveDay: {
-      date: '2026-02-10',
-      count: 18
-    },
-    monthlyDrafts: [
-      { month: 'Aug', count: 8 },
-      { month: 'Sep', count: 12 },
-      { month: 'Oct', count: 15 },
-      { month: 'Nov', count: 20 },
-      { month: 'Dec', count: 18 },
-      { month: 'Jan', count: 21 }
-    ],
-    draftsByType: [
-      { type: 'Contract', count: 45 },
-      { type: 'Civil', count: 32 },
-      { type: 'Criminal', count: 18 },
-      { type: 'Family', count: 14 }
-    ],
-    dailyActivity: [
-      { date: '2026-02-05', count: 8 },
-      { date: '2026-02-06', count: 14 },
-      { date: '2026-02-07', count: 12 },
-      { date: '2026-02-08', count: 18 },
-      { date: '2026-02-09', count: 16 },
-      { date: '2026-02-10', count: 18 },
-      { date: '2026-02-11', count: 15 }
-    ],
-    activityByAction: [
-      { action: 'Generated Draft', count: 45 },
-      { action: 'Edited Draft', count: 28 },
-      { action: 'Case Law Search', count: 22 },
-      { action: 'Statute Search', count: 18 },
-      { action: 'Dictionary Lookup', count: 14 },
-      { action: 'Proofreading', count: 12 },
-      { action: 'Clause Suggestion', count: 8 }
-    ]
-  };
-
   useEffect(() => {
     fetchAnalytics();
   }, []);
@@ -73,19 +29,16 @@ const AnalyticsPage = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      // Try to fetch real data from backend
       const response = await axios.get('/analytics');
       
       if (response.data.success) {
         setAnalytics(response.data.data);
       } else {
-        // Use mock data if no real data
-        setTimeout(() => setAnalytics(mockAnalytics), 1500);
+        setAnalytics(null);
       }
     } catch (error) {
       console.error('Failed to fetch analytics:', error);
-      // Use mock data on error
-      setTimeout(() => setAnalytics(mockAnalytics), 1500);
+      setAnalytics(null);
     } finally {
       setLoading(false);
     }
