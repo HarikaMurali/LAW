@@ -26,7 +26,7 @@ const DraftsPage = () => {
   const fetchDrafts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/drafts', {
+      const res = await axios.get('/api/drafts', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setDrafts(res.data);
@@ -70,7 +70,7 @@ const DraftsPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/drafts/${id}`, {
+      await axios.delete(`/api/drafts/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (viewDraft && viewDraft._id === id) setViewDraft(null);

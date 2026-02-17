@@ -18,7 +18,7 @@ const DraftEditor = ({ draftText, onDraftChange, isLoading }) => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        'http://localhost:5000/api/drafts',
+        '/api/drafts',
         { 
           title: title || 'Untitled Draft',
           draftText: draftText,
@@ -48,7 +48,7 @@ const DraftEditor = ({ draftText, onDraftChange, isLoading }) => {
     setProofreadResult('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/proofread', {
+      const response = await axios.post('/api/proofread', {
         text: draftText
       });
       setProofreadResult(response.data.result || 'Proofreading complete. No major issues found.');
@@ -70,7 +70,7 @@ const DraftEditor = ({ draftText, onDraftChange, isLoading }) => {
     setClauseSuggestions('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/suggest-clauses', {
+      const response = await axios.post('/api/suggest-clauses', {
         text: draftText
       });
       setClauseSuggestions(response.data.suggestions || 'No additional clause suggestions at this time.');
