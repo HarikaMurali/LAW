@@ -24,7 +24,7 @@ const HistoryPage = () => {
   const fetchHistory = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/activity/history', {
+      const response = await axios.get('/api/activity/history', {
         params: {
           action: filterAction === 'all' ? undefined : filterAction,
           type: filterType === 'all' ? undefined : filterType,

@@ -23,13 +23,13 @@ const ResearchPage = () => {
       let response;
       
       if (activeTab === 'caseLaw') {
-        response = await axios.post('/research/cases', { query: searchQuery });
+        response = await axios.post('/api/research/cases', { query: searchQuery });
         setSearchResults(response.data.results || []);
       } else if (activeTab === 'statutes') {
-        response = await axios.post('/research/statutes', { query: searchQuery });
+        response = await axios.post('/api/research/statutes', { query: searchQuery });
         setSearchResults(response.data.results || []);
       } else if (activeTab === 'dictionary') {
-        response = await axios.post('/research/dictionary', { term: searchQuery });
+        response = await axios.post('/api/research/dictionary', { term: searchQuery });
         // Dictionary returns single result, format it for display
         if (response.data.success) {
           setSearchResults([{

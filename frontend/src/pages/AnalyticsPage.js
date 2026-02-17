@@ -29,7 +29,7 @@ const AnalyticsPage = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/analytics');
+      const response = await axios.get('/api/analytics');
       
       if (response.data.success) {
         setAnalytics(response.data.data);
