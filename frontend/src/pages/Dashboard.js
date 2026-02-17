@@ -47,7 +47,7 @@ const Dashboard = () => {
   const fetchDrafts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/drafts', {
+      const res = await axios.get('/api/drafts', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setDrafts(res.data);
@@ -61,7 +61,7 @@ const Dashboard = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/generate', formData);
+      const response = await axios.post('/api/generate', formData);
       if (response.data && response.data.draft) {
         setDraftText(response.data.draft);
         setSelectedDraft(null);

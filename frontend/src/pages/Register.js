@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../utils/axios';
 import '../App.css';
 
 const Register = () => {
@@ -30,7 +30,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await axios.post('http://localhost:5000/api/auth/register', {
+      await axios.post('/api/auth/register', {
         name,
         email,
         password
